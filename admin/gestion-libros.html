@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Libros</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📚 Gestión de Libros</h1>
+    <p>Agrega o elimina libros del catálogo</p>
+  </header>
+
+  <main>
+    <section class="formulario-libro">
+      <h2>Agregar nuevo libro</h2>
+      <form id="formAgregarLibro">
+        <input type="text" id="nombre" placeholder="Nombre de la obra" required>
+        <input type="text" id="autor" placeholder="Autor" required>
+        <input type="text" id="categoria" placeholder="Categoría" required>
+        <textarea id="sinopsis" placeholder="Sinopsis"></textarea>
+        <input type="text" id="anio" placeholder="Año de publicación">
+        <input type="url" id="imagen" placeholder="URL de imagen de portada (opcional)">
+        <textarea id="notas" placeholder="Notas adicionales"></textarea>
+
+        <button type="submit">Agregar Libro</button>
+      </form>
+    </section>
+    <section class="busqueda-libros">
+        <p id="Sub">Buscar libro</p>
+  <input type="text" id="buscador" placeholder="Buscar por nombre, autor o categoría">
+</section>
+    <section class="lista-libros">
+      <h2>Libros actuales</h2>
+      <ul id="listaLibros"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p><a href="panel.html">⬅️ Volver al Panel</a></p>
+  </footer>
+
+  <script src="../js/gestion-libros.js"></script>
+</body>
+</html>

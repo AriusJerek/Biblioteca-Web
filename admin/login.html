@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login de Administrador</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+  <header>
+    <h1>🔒 Acceso de Administrador</h1>
+    <p>Ingrese sus credenciales para acceder al panel</p>
+  </header>
+
+  <main>
+    <form id="loginForm" class="login-form">
+      <input type="text" id="usuario" placeholder="Usuario" required>
+      <input type="password" id="contrasena" placeholder="Contraseña" required>
+      <button type="submit">Ingresar</button>
+    </form>
+    <p id="error" class="error"></p>
+  </main>
+
+  <footer>
+    <p><a href="../index.html">Volver al inicio</a></p>
+  </footer>
+
+  <script src="../js/login.js"></script>
+</body>
+</html>
