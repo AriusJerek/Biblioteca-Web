@@ -256,3 +256,18 @@ textarea {
   resize: vertical;
 }
 
+.libro-detalle {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.img-escudo {
+  max-width: 100px;
+  margin-bottom: 20px;
+  display: block;
+  margin-left: auto;
+}
