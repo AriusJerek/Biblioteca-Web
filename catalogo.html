@@ -6,7 +6,8 @@
   <title>Catálogo de Libros</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
-<body>
+<body><div id="navbar-container"></div>
+
   <header>
     <h1>📖 Catálogo de Libros</h1>
     <p>Explora nuestra colección disponible</p>
@@ -15,11 +16,25 @@
   <main>
     <section id="catalogo" class="catalogo"></section>
   </main>
-
   <footer>
-    <p><a href="index.html">Volver al inicio</a></p>
-  </footer>
-
+    <p>&copy; 2025 Biblioteca Virtual. Todos los derechos reservados.</p>
   <script src="js/catalogo.js"></script>
+  <script>
+  // Cargar navbar
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("navbar-container").innerHTML = data;
+
+      // Activar el menú hamburguesa luego de cargar
+      const toggleBtn = document.getElementById('menuToggle');
+      const navbarLinks = document.getElementById('navbarLinks');
+
+      toggleBtn.addEventListener('click', () => {
+        navbarLinks.classList.toggle('show');
+      });
+    });
+</script>
+
 </body>
 </html>

@@ -8,22 +8,56 @@
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
+<div id="navbar-container"></div>
+
   <header>
     <h1>📚 Biblioteca Virtual</h1>
     <p>Bienvenido a nuestra biblioteca en línea. <br>
       Explora libros, autores y mucho más.</p>
   </header>
-<img src="../img/logo.png" alt="Logo Biblioteca Virtual" class="img-escudo">
   <main>
     <section class="botones">
       <a href="catalogo.html" class="btn">Ver Catálogo</a>
       <a href="admin/login.html" class="btn">Administración</a>
     </section>
+    <section id="novedades" class="seccion-novedades">
+  <h2>📢 Anuncios y Novedades</h2>
+  <ul id="listaNovedades">
+    <script src="js/novedades.js"></script>
+  </ul>
+</section>
+
   </main>
 
   <footer>
     <p>&copy; 2025 Biblioteca Virtual. Todos los derechos reservados.</p>
   </footer>
+  <script>
+  const toggleBtn = document.getElementById('menuToggle');
+  const navbarLinks = document.getElementById('navbarLinks');
+
+  toggleBtn.addEventListener('click', () => {
+    navbarLinks.classList.toggle('show');
+  });
+</script>
+<script>
+  // Cargar navbar
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("navbar-container").innerHTML = data;
+
+      // Activar el menú hamburguesa luego de cargar
+      const toggleBtn = document.getElementById('menuToggle');
+      const navbarLinks = document.getElementById('navbarLinks');
+
+      toggleBtn.addEventListener('click', () => {
+        navbarLinks.classList.toggle('show');
+      });
+    });
+</script>
+
+
 </body>
 
 </html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestión de Anuncios</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <header>
+    <h1>🛠️ Panel de Anuncios</h1>
+  </header>
+
+  <main>
+    <form id="formAnuncio">
+      <input type="date" id="fecha" required />
+      <textarea id="mensaje" placeholder="Escribe el mensaje del anuncio..." required></textarea>
+      <button type="submit">Agregar Anuncio</button>
+    </form>
+
+    <section>
+      <h2>Anuncios Actuales</h2>
+      <ul id="listaAnuncios"></ul>
+    </section>
+  </main>
+
+  <script src="js/gestion-anuncios.js"></script>
+</body>
+</html>
