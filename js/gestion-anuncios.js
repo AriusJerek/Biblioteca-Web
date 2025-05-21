@@ -6,9 +6,10 @@ function mostrarAnuncios() {
   lista.innerHTML = "";
   anuncios.forEach((anuncio, index) => {
     const li = document.createElement("li");
+    li.classList.add("anuncio-item");
     li.innerHTML = `
-      <strong>${anuncio.fecha}:</strong> ${anuncio.mensaje}
-      <button onclick="eliminarAnuncio(${index})" style="margin-left: 10px;">🗑️ Eliminar</button>
+      <span class="fecha">${anuncio.fecha}:</span> ${anuncio.mensaje}
+      <button class="btn-eliminar" onclick="eliminarAnuncio(${index})">🗑️ Eliminar</button>
     `;
     lista.appendChild(li);
   });
@@ -22,8 +23,7 @@ function eliminarAnuncio(index) {
   }
 }
 
-
-form.addEventListener("submit", function(e) {
+form.addEventListener("submit", function (e) {
   e.preventDefault();
 
   const fecha = document.getElementById("fecha").value;
@@ -38,3 +38,4 @@ form.addEventListener("submit", function(e) {
 });
 
 mostrarAnuncios();
+

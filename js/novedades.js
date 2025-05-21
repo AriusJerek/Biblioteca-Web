@@ -1,4 +1,4 @@
-const lista = document.getElementById("listaNovedades");
+const lista = document.getElementById("lista-novedades");
 const anuncios = JSON.parse(localStorage.getItem("anuncios")) || [];
 
 anuncios.forEach(anuncio => {
