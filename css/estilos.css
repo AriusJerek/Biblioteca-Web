@@ -488,15 +488,6 @@ button:hover {
   font-weight: bold;
   transition: color 0.3s ease;
 }
-/* Botón de volver al panel */
-.btn-volver {
-  display: inline-block;
-  margin-top: 30px;
-  text-decoration: none;
-  color: #1abc9c;
-  font-weight: bold;
-  transition: color 0.3s ease;
-}
 
 /* Estilo para cada anuncio */
 .anuncio-item {
@@ -536,5 +527,51 @@ button:hover {
 }
 
 
+#listaAnuncios li .fecha {
+  font-weight: bold;
+  color: #2c3e50;
+}
 
+form#formAnuncio input[type="date"],
+form#formAnuncio textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+}
 
+form#formAnuncio textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+form#formAnuncio button {
+  width: fit-content;
+  padding: 10px 20px;
+  background-color: #1abc9c;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form#formAnuncio button:hover {
+  background-color: #16a085;
+}
+
+.anuncios-container h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+form#formAnuncio {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
