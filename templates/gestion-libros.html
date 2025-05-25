@@ -101,6 +101,7 @@
           ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada" style="max-width:80px;">` : ''}
           <div class="acciones">
             <button onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
+            <button onclick="editarLibro(${libro.id})">✏️ Editar</button>
           </div>
         `;
         lista.appendChild(li);
@@ -196,6 +197,86 @@
       }
     }
     window.eliminarLibro = eliminarLibro;
+    document.getElementById('seccion-selector').addEventListener('change', function () {
+      cargarLibros(this.value);
+    });
+
+    // Función para editar libro
+    function editarLibro(id) {
+      const libro = todosLosLibros.find(l => l.id === id);
+      if (!libro) return;
+      // Crear formulario flotante
+      let formDiv = document.getElementById('form-editar-libro');
+      if (formDiv) formDiv.remove();
+      formDiv = document.createElement('div');
+      formDiv.id = 'form-editar-libro';
+      formDiv.style.position = 'fixed';
+      formDiv.style.top = '50%';
+      formDiv.style.left = '50%';
+      formDiv.style.transform = 'translate(-50%, -50%)';
+      formDiv.style.background = '#fff';
+      formDiv.style.padding = '20px';
+      formDiv.style.borderRadius = '8px';
+      formDiv.style.boxShadow = '0 2px 16px rgba(0,0,0,0.3)';
+      formDiv.style.zIndex = '10000';
+      formDiv.style.maxWidth = '350px';
+      formDiv.style.width = '90%';
+      formDiv.style.overflowY = 'auto';
+      formDiv.style.maxHeight = '90vh';
+      formDiv.innerHTML = `
+        <h3>Editar libro</h3>
+        <form id="formEditarLibro" style="display:flex;flex-direction:column;gap:8px;">
+          <input type="number" id="edit-cantidad" placeholder="Cantidad" min="1" value="${libro.cantidad || 1}" required>
+          <input type="text" id="edit-codigo" placeholder="Código" value="${libro.codigo}" required>
+          <input type="text" id="edit-categoria" placeholder="Categoría" value="${libro.categoria}" required>
+          <input type="text" id="edit-nombre" placeholder="Nombre del libro" value="${libro.nombre}" required>
+          <input type="text" id="edit-autor" placeholder="Autor" value="${libro.autor}" required>
+          <input type="text" id="edit-estado" placeholder="Estado" value="${libro.estado}" required>
+          <input type="text" id="edit-origen" placeholder="Origen" value="${libro.origen}" required>
+          <input type="url" id="edit-imagen" placeholder="URL de imagen de portada (opcional)" value="${libro.imagen || ''}">
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button type="submit">Guardar cambios</button>
+            <button type="button" id="cancelar-edicion">Cancelar</button>
+          </div>
+        </form>
+      `;
+      document.body.appendChild(formDiv);
+      document.getElementById('cancelar-edicion').onclick = () => formDiv.remove();
+      document.getElementById('formEditarLibro').onsubmit = function(e) {
+        e.preventDefault();
+        const seccion = document.getElementById('seccion-selector').value;
+        const cantidad = document.getElementById('edit-cantidad').value.trim();
+        const codigo = document.getElementById('edit-codigo').value.trim();
+        const categoria = document.getElementById('edit-categoria').value.trim();
+        const nombre = document.getElementById('edit-nombre').value.trim();
+        const autor = document.getElementById('edit-autor').value.trim();
+        const estado = document.getElementById('edit-estado').value.trim();
+        const origen = document.getElementById('edit-origen').value.trim();
+        const imagen = document.getElementById('edit-imagen').value.trim();
+        fetch(`/api/libros/${seccion}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cantidad: Number(cantidad), codigo, categoria, nombre, autor, estado, origen, imagen })
+        })
+        .then(res => res.json().then(data => ({status: res.status, data})))
+        .then(({status, data}) => {
+          if (Array.isArray(data)) {
+            todosLosLibros = data;
+            mostrarLibros(data);
+            mostrarMensaje('Libro editado correctamente', 'success');
+            formDiv.remove();
+          } else if (data && data.error) {
+            mostrarMensaje(data.error, 'error');
+          } else {
+            mostrarMensaje('Error al editar libro', 'error');
+          }
+        })
+        .catch(() => {
+          mostrarMensaje('Error al editar libro', 'error');
+        });
+      };
+    }
+    window.editarLibro = editarLibro;
     document.getElementById('seccion-selector').addEventListener('change', function () {
       cargarLibros(this.value);
     });

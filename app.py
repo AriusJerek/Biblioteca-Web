@@ -111,6 +111,48 @@ def eliminar_libro_seccion(seccion, libro_id):
     except Exception:
         return jsonify({'error': 'Error interno del servidor'}), 500
 
+@app.route('/api/libros/<seccion>/<int:libro_id>', methods=['PUT'])
+def editar_libro_seccion(seccion, libro_id):
+    if 'usuario' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    if not re.fullmatch(r'\d{3}', seccion):
+        return jsonify({'error': 'Sección inválida'}), 400
+    data = request.get_json()
+    cantidad = data.get('cantidad')
+    codigo = data.get('codigo')
+    categoria = data.get('categoria')
+    nombre = data.get('nombre')
+    autor = data.get('autor')
+    estado = data.get('estado')
+    origen = data.get('origen')
+    imagen = data.get('imagen')
+    if not all([nombre, autor, categoria, codigo, estado, origen, cantidad]):
+        return jsonify({'error': 'Datos incompletos'}), 400
+    try:
+        cantidad = int(cantidad)
+        if cantidad < 1:
+            raise ValueError
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Cantidad inválida'}), 400
+    tabla = f'libros_{seccion}'
+    try:
+        with sqlite3.connect(DATABASE_LIBROS) as conn:
+            conn.row_factory = sqlite3.Row
+            c = conn.cursor()
+            c.execute(
+                f'UPDATE {tabla} SET cantidad=?, codigo=?, categoria=?, nombre=?, autor=?, estado=?, origen=?, imagen=? WHERE id=?',
+                (cantidad, codigo, categoria, nombre, autor, estado, origen, imagen, libro_id)
+            )
+            conn.commit()
+            if c.rowcount == 0:
+                return jsonify({'error': 'Libro no encontrado'}), 404
+            libros = c.execute(f'SELECT * FROM {tabla}').fetchall()
+            return jsonify([dict(libro) for libro in libros])
+    except sqlite3.OperationalError:
+        return jsonify({'error': 'Sección no encontrada'}), 404
+    except Exception:
+        return jsonify({'error': 'Error interno del servidor'}), 500
+
 # --- API para alumnos ---
 @app.route('/api/alumnos')
 def api_alumnos():

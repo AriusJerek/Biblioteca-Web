@@ -1,4 +1,0 @@
-cantidad,codigo,categoria,nombre,autor,estado,origen,imagen
-3,A001,Novela,Don Quijote,Miguel de Cervantes,Disponible,Biblioteca Central,https://ejemplo.com/quijote.jpg
-5,A002,Poesía,Veinte poemas de amor,Pablo Neruda,Prestado,Donación,https://ejemplo.com/neruda.jpg
-2,A003,Ensayo,El laberinto de la soledad,Octavio Paz,Disponible,Compra,https://ejemplo.com/paz.jpg
