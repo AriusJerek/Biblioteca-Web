@@ -8,13 +8,13 @@
   <link rel="stylesheet" href="/static/css/estilos.css">
 </head>
 <body>
-
-<a href="/panel" class="btn-volver">🏠 Volver al Panel</a>
   <header class="titulo">
-    <img src="/static/img/logo.png" alt="Logo Biblioteca Virtual" class="img-escudo">
     <h1>📚 Gestión de Libros</h1>
     <p>Agrega o elimina libros del catálogo</p>
+    <a href="/panel" class="btn-volver" style="float:left; margin-top:-40px;">🏠 Volver al Panel</a>
+    <img src="/static/img/logo.png" alt="Logo Biblioteca Virtual" style="float:right; margin-top:-40px;">
   </header>
+
   <main>
     <section class="formulario-libro">
       <label for="seccion-selector"><b>Sección:</b></label>
@@ -94,11 +94,12 @@
         li.innerHTML = `
           <strong>${libro.nombre}</strong> <br>
           <span><b>Autor:</b> ${libro.autor}</span> <br>
+          <span><b>Cantidad:</b> ${libro.cantidad}</span> <br>
           <span><b>Categoría:</b> ${libro.categoria}</span> <br>
           <span><b>Código:</b> ${libro.codigo}</span> <br>
           <span><b>Estado:</b> ${libro.estado}</span> <br>
           <span><b>Origen:</b> ${libro.origen}</span> <br>
-          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada" style="max-width:80px;">` : ''}
+          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada" style="max-width:80px;" onerror="this.onerror=null;this.src='/static/img/logo.png'">` : ''}
           <div class="acciones">
             <button onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
             <button onclick="editarLibro(${libro.id})">✏️ Editar</button>
