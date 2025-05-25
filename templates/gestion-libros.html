@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/img/favicon.png" type="image/png">
+  <title>Gestión de Libros</title>
+  <link rel="stylesheet" href="/static/css/estilos.css">
+</head>
+<body>
+
+<a href="/panel" class="btn-volver">🏠 Volver al Panel</a>
+  <header class="titulo">
+    <img src="/static/img/logo.png" alt="Logo Biblioteca Virtual" class="img-escudo">
+    <h1>📚 Gestión de Libros</h1>
+    <p>Agrega o elimina libros del catálogo</p>
+  </header>
+  <main>
+    <section class="formulario-libro">
+      <label for="seccion-selector"><b>Sección:</b></label>
+      <select id="seccion-selector">
+        <option value="000">Sección 000</option>
+        <option value="100">Sección 100</option>
+        <option value="200">Sección 200</option>
+        <option value="300">Sección 300</option>
+        <option value="400">Sección 400</option>
+        <option value="500">Sección 500</option>
+        <option value="600">Sección 600</option>
+        <option value="700">Sección 700</option>
+        <option value="800">Sección 800</option>
+        <option value="900">Sección 900</option>
+      </select>
+      <h2>Agregar nuevo libro</h2>
+      <form id="formAgregarLibro">
+        <input type="number" id="cantidad" placeholder="Cantidad" min="1" required>
+        <input type="text" id="codigo" placeholder="Código" required>
+        <input type="text" id="categoria" placeholder="Categoría" required>
+        <input type="text" id="nombre" placeholder="Nombre del libro" required>
+        <input type="text" id="autor" placeholder="Autor" required>
+        <input type="text" id="estado" placeholder="Estado" required>
+        <input type="text" id="origen" placeholder="Origen" required>
+        <input type="url" id="imagen" placeholder="URL de imagen de portada (opcional)">
+        <button type="submit">Agregar Libro</button>
+      </form>
+    </section>
+
+    <section class="busqueda-libros">
+        <p id="Sub">Buscar: Libro/Autor/Categoría:</p>
+  <input type="text" id="buscador" placeholder="Buscar por nombre, autor o categoría">
+</section>
+    <section class="lista-libros">
+      <h2>Libros actuales</h2>
+      <ul id="listaLibros"></ul>
+    </section>
+  </main>
+
+  <footer>
+
+  </footer>
+
+  <script>
+    // Obtener y mostrar libros
+    let todosLosLibros = [];
+    function cargarLibros(seccion) {
+      fetch(`/api/libros/${seccion}`)
+        .then(res => res.json().then(data => ({status: res.status, data})))
+        .then(({status, data}) => {
+          if (Array.isArray(data)) {
+            todosLosLibros = data;
+            mostrarLibros(data);
+          } else if (data && data.error) {
+            document.getElementById('listaLibros').innerHTML = `<li style="color:red">${data.error}</li>`;
+            mostrarMensaje(data.error, 'error');
+          } else {
+            document.getElementById('listaLibros').innerHTML = '<li style="color:red">No se pudieron cargar los libros.</li>';
+            mostrarMensaje('No se pudieron cargar los libros.', 'error');
+          }
+        })
+        .catch(() => {
+          document.getElementById('listaLibros').innerHTML = '<li style="color:red">No se pudieron cargar los libros.</li>';
+          mostrarMensaje('No se pudieron cargar los libros.', 'error');
+        });
+    }
+
+    function mostrarLibros(libros) {
+      const lista = document.getElementById('listaLibros');
+      lista.innerHTML = '';
+      if (libros.length === 0) {
+        lista.innerHTML = '<li>No hay libros registrados.</li>';
+        return;
+      }
+      libros.forEach(libro => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${libro.nombre}</strong> <br>
+          <span><b>Autor:</b> ${libro.autor}</span> <br>
+          <span><b>Categoría:</b> ${libro.categoria}</span> <br>
+          <span><b>Código:</b> ${libro.codigo}</span> <br>
+          <span><b>Estado:</b> ${libro.estado}</span> <br>
+          <span><b>Origen:</b> ${libro.origen}</span> <br>
+          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada" style="max-width:80px;">` : ''}
+          <div class="acciones">
+            <button onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
+          </div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    // Buscar libros
+    document.getElementById('buscador').addEventListener('input', function () {
+      const texto = this.value.toLowerCase();
+      const filtrados = todosLosLibros.filter(libro =>
+        (libro.nombre || '').toLowerCase().includes(texto) ||
+        (libro.autor || '').toLowerCase().includes(texto) ||
+        (libro.categoria || '').toLowerCase().includes(texto) ||
+        (libro.codigo || '').toLowerCase().includes(texto) ||
+        (libro.estado || '').toLowerCase().includes(texto) ||
+        (libro.origen || '').toLowerCase().includes(texto)
+      );
+      mostrarLibros(filtrados);
+    });
+
+    // Al agregar libro, refrescar la lista y el buscador
+    document.getElementById('formAgregarLibro').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const seccion = document.getElementById('seccion-selector').value;
+      const cantidad = document.getElementById('cantidad').value.trim();
+      const codigo = document.getElementById('codigo').value.trim();
+      const categoria = document.getElementById('categoria').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      const autor = document.getElementById('autor').value.trim();
+      const estado = document.getElementById('estado').value.trim();
+      const origen = document.getElementById('origen').value.trim();
+      const imagen = document.getElementById('imagen').value.trim();
+      if (!cantidad || !nombre || !autor || !categoria || !codigo || !estado || !origen) return;
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Agregando...';
+      fetch(`/api/libros/${seccion}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cantidad: Number(cantidad), codigo, categoria, nombre, autor, estado, origen, imagen })
+      })
+      .then(res => res.json().then(data => ({status: res.status, data})))
+      .then(({status, data}) => {
+        this.reset();
+        document.getElementById('buscador').value = '';
+        if (Array.isArray(data)) {
+          todosLosLibros = data;
+          mostrarLibros(data);
+          mostrarMensaje('Libro agregado correctamente', 'success');
+        } else if (data && data.error) {
+          mostrarMensaje(data.error, 'error');
+        } else {
+          mostrarMensaje('Error al agregar libro', 'error');
+        }
+      })
+      .catch(() => {
+        mostrarMensaje('Error al agregar libro', 'error');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.textContent = 'Agregar Libro';
+      });
+    });
+
+    // Mensaje de feedback
+    function mostrarMensaje(msg, tipo) {
+      let div = document.getElementById('mensaje-feedback');
+      if (!div) {
+        div = document.createElement('div');
+        div.id = 'mensaje-feedback';
+        div.style.position = 'fixed';
+        div.style.top = '10px';
+        div.style.right = '10px';
+        div.style.zIndex = '9999';
+        document.body.appendChild(div);
+      }
+      div.textContent = msg;
+      div.style.background = tipo === 'success' ? '#4caf50' : '#f44336';
+      div.style.color = 'white';
+      div.style.padding = '10px 20px';
+      div.style.borderRadius = '5px';
+      div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+      setTimeout(() => { div.textContent = ''; }, 2000);
+    }
+
+    // Eliminar libro
+    function eliminarLibro(id) {
+      const seccion = document.getElementById('seccion-selector').value;
+      if (confirm('¿Seguro que deseas eliminar este libro?')) {
+        fetch(`/api/libros/${seccion}/${id}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(() => cargarLibros(seccion));
+      }
+    }
+    window.eliminarLibro = eliminarLibro;
+    document.getElementById('seccion-selector').addEventListener('change', function () {
+      cargarLibros(this.value);
+    });
+
+    // Al cargar la página, mostrar la primera sección
+    cargarLibros(document.getElementById('seccion-selector').value);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/img/favicon.png" type="image/png">
+  <title>Gestión de Anuncios</title>
+  <link rel="stylesheet" href="/static/css/estilos.css">
+</head>
+<body>
+  <div class="anuncios-container">
+    <h1>📢 Gestión de Anuncios</h1>
+
+  <main>
+    <form id="formAnuncio">
+      <input type="date" id="fecha" required />
+      <textarea id="mensaje" placeholder="Escribe el mensaje del anuncio..." required></textarea>
+      <button type="submit">Agregar Anuncio</button>
+    </form>
+
+    <section>
+      <h2>Anuncios Actuales</h2>
+      <ul id="listaAnuncios"></ul>
+    </section>
+  </main>
+  <a href="/panel" class="btn-volver">← Volver al Panel</a>
+  </div>
+
+  <script>
+    // Mostrar anuncios desde la API
+    function cargarAnuncios() {
+      fetch('/api/anuncios')
+        .then(res => res.json())
+        .then(anuncios => {
+          const lista = document.getElementById('listaAnuncios');
+          lista.innerHTML = '';
+          anuncios.forEach(anuncio => {
+            const li = document.createElement('li');
+            li.classList.add('anuncio-item');
+            li.innerHTML = `<span class="fecha">${anuncio.fecha}:</span> ${anuncio.mensaje}
+              <button class="btn-eliminar" onclick="eliminarAnuncio(${anuncio.id})">🗑️ Eliminar</button>`;
+            lista.appendChild(li);
+          });
+        });
+    }
+
+    // Agregar anuncio
+    document.getElementById('formAnuncio').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const fecha = document.getElementById('fecha').value;
+      const mensaje = document.getElementById('mensaje').value.trim();
+      if (fecha && mensaje) {
+        fetch('/api/anuncios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fecha, mensaje })
+        })
+        .then(res => res.json())
+        .then(() => {
+          this.reset();
+          cargarAnuncios();
+        });
+      }
+    });
+
+    // Eliminar anuncio
+    function eliminarAnuncio(id) {
+      if (confirm('¿Seguro que deseas eliminar este anuncio?')) {
+        fetch(`/api/anuncios/${id}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(() => cargarAnuncios());
+      }
+    }
+    window.eliminarAnuncio = eliminarAnuncio;
+    cargarAnuncios();
+  </script>
+</body>
+</html>

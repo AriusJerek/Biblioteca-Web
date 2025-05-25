@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo de Libros</title>
+  <link rel="stylesheet" href="/static/css/estilos.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+  <h1>Catálogo de Libros</h1>
+
+  <label for="seccion-selector"><b>Sección:</b></label>
+  <select id="seccion-selector">
+    <option value="000">Sección 000</option>
+    <option value="100">Sección 100</option>
+    <option value="200">Sección 200</option>
+    <option value="300">Sección 300</option>
+    <option value="400">Sección 400</option>
+    <option value="500">Sección 500</option>
+    <option value="600">Sección 600</option>
+    <option value="700">Sección 700</option>
+    <option value="800">Sección 800</option>
+    <option value="900">Sección 900</option>
+  </select>
+  <input type="text" id="buscador-libros" placeholder="Buscar libro, autor o categoría">
+  <div id="libros"></div>
+  
+  <script>
+  // Cargar la barra de navegación desde navbar.html
+  fetch("/static/navbar.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("navbar-container").innerHTML = html;
+    });
+  </script>
+
+  <script>
+    let todosLosLibros = [];
+
+    function cargarLibros(seccion) {
+      // Obtener los libros desde la API
+      fetch(`/api/libros/${seccion}`)
+        .then(res => res.json())
+        .then(data => {
+          todosLosLibros = data;
+          mostrarLibros(data);
+        });
+    }
+
+    function mostrarLibros(libros) {
+      const contenedor = document.getElementById('libros');
+      contenedor.innerHTML = '';
+      libros.forEach(libro => {
+        const div = document.createElement('div');
+        div.className = 'libro';
+        div.innerHTML = `
+          <h3>${libro.nombre}</h3>
+          <p><strong>Autor:</strong> ${libro.autor}</p>
+          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada del libro" style="max-width:120px;">` : ''}
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    // Evento del selector de sección
+    document.getElementById('seccion-selector').addEventListener('change', function () {
+      cargarLibros(this.value);
+    });
+
+    // Evento del buscador
+    document.getElementById('buscador-libros').addEventListener('input', function () {
+      const texto = this.value.toLowerCase();
+      const filtrados = todosLosLibros.filter(libro =>
+        libro.nombre.toLowerCase().includes(texto) ||
+        libro.autor.toLowerCase().includes(texto) ||
+        libro.categoria.toLowerCase().includes(texto)
+      );
+      mostrarLibros(filtrados);
+    });
+
+    // Al cargar la página, mostrar la primera sección
+    cargarLibros(document.getElementById('seccion-selector').value);
+  </script>
+</body>
+</html>

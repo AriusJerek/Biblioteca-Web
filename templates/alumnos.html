@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Alumnos</title>
+  <link rel="icon" href="/static/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/static/css/estilos.css">
+</head>
+<body>
+  <h1>Alumnos Registrados</h1>
+
+  <input type="text" id="buscador-alumnos" placeholder="Buscar nombre o código">
+  <div id="alumnos"></div>
+
+  <script>
+    let todosLosAlumnos = [];
+
+    fetch('/api/alumnos')
+      .then(res => res.json())
+      .then(data => {
+        todosLosAlumnos = data;
+        mostrarAlumnos(data);
+      });
+
+    function mostrarAlumnos(alumnos) {
+      const contenedor = document.getElementById('alumnos');
+      contenedor.innerHTML = '';
+      alumnos.forEach(alumno => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <p><strong>Nombre:</strong> ${alumno.nombre}</p>
+          <p><strong>Código:</strong> ${alumno.codigo}</p>
+          <hr>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    document.getElementById('buscador-alumnos').addEventListener('input', function () {
+      const texto = this.value.toLowerCase();
+      const filtrados = todosLosAlumnos.filter(alumno =>
+        alumno.nombre.toLowerCase().includes(texto) ||
+        alumno.codigo.toLowerCase().includes(texto)
+      );
+      mostrarAlumnos(filtrados);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+INFORME DE CONFIGURACIONES DE SEGURIDAD
+======================================
+
+Fecha: 24/05/2025
+
+1. Autenticación y Control de Acceso
+------------------------------------
+- El sistema utiliza autenticación de usuarios mediante sesiones Flask (`session['usuario']`).
+- Las rutas administrativas y de gestión (`/panel`, `/gestion`, `/anuncios`, y API de gestión) requieren usuario autenticado.
+- El cierre de sesión elimina la variable de sesión, previniendo accesos no autorizados tras logout.
+
+2. Gestión Segura de Contraseñas
+-------------------------------
+- Las contraseñas de usuarios se almacenan usando el algoritmo de hash bcrypt (seguro y resistente a ataques de fuerza bruta).
+- El login compara el hash almacenado con el hash de la contraseña ingresada.
+- El script `crea_usuario.py` también utiliza bcrypt para almacenar contraseñas.
+
+3. Validación de Datos y SQL Seguro
+-----------------------------------
+- Todos los endpoints POST validan que los campos requeridos estén presentes antes de operar sobre la base de datos.
+- Se utiliza SQL parametrizado en todas las consultas, previniendo inyección SQL.
+- No se exponen contraseñas ni información sensible en las respuestas de la API.
+
+4. Manejo de Errores y Feedback Seguro
+--------------------------------------
+- Los errores de base de datos y autenticación devuelven mensajes claros y códigos HTTP apropiados (401, 400, 404).
+- El frontend muestra mensajes de error visuales al usuario en caso de problemas de conexión o errores de la API.
+- El botón de agregar libro se deshabilita durante la petición para evitar envíos duplicados.
+
+5. Gestión de Sesiones
+----------------------
+- Uso de `app.secret_key` para proteger la cookie de sesión.
+- Logout elimina la sesión.
+
+6. Scripts Auxiliares
+---------------------
+- Los scripts de administración y migración (`crea_usuario.py`, `corregir_tablas.py`, `crear_tablas_libros.py`, `excel_a_sql.py`) están diseñados para uso local del administrador y no exponen rutas web.
+- Uso de SQL parametrizado en operaciones de base de datos.
+
+7. Frontend
+-----------
+- No se exponen datos sensibles en el frontend.
+- El feedback de errores y éxito es claro y no revela detalles internos del sistema.
+- No se permite la gestión de libros ni anuncios a usuarios no autenticados.
+
+8. Base de Datos
+----------------
+- Usuarios y libros/anuncios están en bases de datos separadas.
+- Tablas de libros por sección, todas con columna `id` autoincremental.
+- No se almacena información sensible de usuarios en la base de datos de libros.
+
+Recomendaciones Adicionales
+--------------------------
+- Usar HTTPS en producción.
+- Implementar protección CSRF en formularios (por ejemplo, usando Flask-WTF).
+- Limitar intentos de login para evitar ataques de fuerza bruta.
+- Revisar permisos de archivos y bases de datos en el servidor.
+- Mantener actualizadas las dependencias de Python y JS.
+- Revisar y auditar periódicamente los logs de acceso y errores.

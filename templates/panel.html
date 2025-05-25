@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="img/favicon.png" type="image/png">
+  <link rel="icon" href="static/img/favicon.png" type="image/png">
   <title>Panel de Administración</title>
-  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../static/css/estilos.css">
 </head>
 <body>
   <header>
     <h1>📋 Panel de Administración</h1>
     <p>Bienvenido, administrador</p>
+    <a href="/logout" class="btn btn-logout" style="float:right; margin-top:-40px;">Cerrar sesión</a>
   </header>
 
   <main>
     <section class="panel-opciones">
-      <a href="gestion-libros.html" class="btn">📚 Gestionar Libros</a>
-      <a href="gestion-anuncios.html" class="btn">📢 Gestión de Anuncios</button></a>
-      <a href="index.html" class="btn">🏠 Volver al Inicio</a>
+      <a href="/gestion" class="btn">📚 Gestionar Libros</a>
+      <a href="/anuncios" class="btn">📢 Gestión de Anuncios</a>
+      <a href="/" class="btn">🏠 Volver al Inicio</a>
     </section>
   </main>
 
