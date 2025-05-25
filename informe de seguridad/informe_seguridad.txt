@@ -49,6 +49,33 @@ Fecha: 24/05/2025
 - Tablas de libros por sección, todas con columna `id` autoincremental.
 - No se almacena información sensible de usuarios en la base de datos de libros.
 
+---
+
+[24/05/2025] Mejoras recientes aplicadas al sistema:
+
+1. Eliminación de endpoints y lógica redundante:
+   - Se eliminaron los endpoints y lógica que usaban la tabla 'libros' global, dejando solo la gestión por tablas de sección (libros_000, libros_100, etc.), evitando inconsistencias y posibles errores de acceso a tablas inexistentes.
+
+2. Decorador de autenticación:
+   - Se implementó un decorador `login_required` para proteger rutas que requieren autenticación, centralizando la comprobación de sesión y evitando repeticiones de código, lo que reduce el riesgo de errores y mejora la mantenibilidad.
+
+3. Organización y claridad:
+   - Se añadieron comentarios claros para separar secciones del código, facilitando la revisión y futuras auditorías de seguridad.
+
+4. Limpieza de código repetido:
+   - Se eliminó la comprobación manual de sesión en cada vista protegida, usando el decorador para mayor robustez y menor superficie de error.
+
+5. Migración de la tabla anuncios:
+   - Se migró la tabla `anuncios` a la base de datos principal (`basedatos.db`), centralizando la gestión y mejorando la integridad de los datos.
+
+Recomendaciones de seguridad adicionales:
+- Usar una `secret_key` robusta y almacenada en variables de entorno en producción.
+- Implementar protección CSRF en formularios y endpoints sensibles.
+- Configurar expiración de sesión y logging de intentos de login.
+- Usar HTTPS en producción para proteger la transmisión de datos.
+
+Estas acciones refuerzan la seguridad, organización y mantenibilidad del sistema de gestión de la biblioteca virtual.
+
 Recomendaciones Adicionales
 --------------------------
 - Usar HTTPS en producción.

@@ -6,6 +6,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
 <body>
+  <header>
+    <h1>🔑 Biblioteca Virtual</h1>
+    <p>Iniciar sesión para acceder al panel de administración</p>
+    <a href="/" class="btn-volver" style="float:left; margin-top:-40px;">🏠 Volver al Inicio</a>  
+  </header>
   <main class="login-container">
     <h2>🔐 Iniciar Sesión</h2>
     <form method="POST" action="{{ url_for('login') }}">

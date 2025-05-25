@@ -21,18 +21,6 @@ def validar_usuario(username, password):
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
     return False
 
-# Inicialización de la base de datos de anuncios
-def init_db():
-    conn = sqlite3.connect(DATABASE_USUARIOS)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS anuncios (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        fecha TEXT NOT NULL,
-        mensaje TEXT NOT NULL
-    )''')
-    conn.commit()
-    conn.close()
-
 # --- Vistas ---
 @app.route('/')
 def inicio():
@@ -46,92 +34,7 @@ def catalogo():
 def alumnos():
     return render_template('alumnos.html')
 
-@app.route('/panel')
-def panel():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    return render_template('panel.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        contrasena = request.form['contrasena']
-        if validar_usuario(usuario, contrasena):
-            session['usuario'] = usuario
-            return redirect(url_for('panel'))
-        else:
-            error = 'Claves incorrectas'
-    return render_template('login.html', error=error)
-
-@app.route('/logout')
-def logout():
-    session.pop('usuario', None)
-    return redirect(url_for('login'))
-
-@app.route('/gestion')
-def gestion():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    return render_template('gestion-libros.html')
-
-@app.route('/anuncios')
-def anuncios():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    return render_template('gestion-anuncios.html')
-
-
-# --- API para libros ---
-@app.route('/api/libros', methods=['GET'])
-def api_libros():
-    # Por compatibilidad, mostrar libros de la sección 000 por defecto
-    conn = sqlite3.connect(DATABASE_LIBROS)
-    conn.row_factory = sqlite3.Row
-    try:
-        libros = conn.execute('SELECT * FROM libros_000').fetchall()
-    except sqlite3.OperationalError:
-        conn.close()
-        return jsonify([])
-    conn.close()
-    return jsonify([dict(libro) for libro in libros])
-
-@app.route('/api/libros', methods=['POST'])
-def agregar_libro():
-    if 'usuario' not in session:
-        return jsonify({'error': 'No autorizado'}), 401
-    data = request.get_json()
-    cantidad = data.get('cantidad')
-    codigo = data.get('codigo')
-    categoria = data.get('categoria')
-    nombre = data.get('nombre')
-    autor = data.get('autor')
-    estado = data.get('estado')
-    origen = data.get('origen')
-    imagen = data.get('imagen')
-    if not nombre or not autor or not categoria or not codigo or not estado or not origen or not cantidad:
-        return jsonify({'error': 'Datos incompletos'}), 400
-    conn = sqlite3.connect(DATABASE_LIBROS)
-    c = conn.cursor()
-    c.execute('INSERT INTO libros (cantidad, codigo, categoria, nombre, autor, estado, origen, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-              (cantidad, codigo, categoria, nombre, autor, estado, origen, imagen))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
-@app.route('/api/libros/<int:libro_id>', methods=['DELETE'])
-def eliminar_libro(libro_id):
-    if 'usuario' not in session:
-        return jsonify({'error': 'No autorizado'}), 401
-    conn = sqlite3.connect(DATABASE_LIBROS)
-    c = conn.cursor()
-    c.execute('DELETE FROM libros WHERE id=?', (libro_id,))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
-# Endpoint dinámico para consultar libros de una sección específica
+# --- API para libros por sección ---
 @app.route('/api/libros/<seccion>', methods=['GET'])
 def api_libros_seccion(seccion):
     tabla = f'libros_{seccion}'
@@ -207,6 +110,7 @@ def eliminar_libro_seccion(seccion, libro_id):
         return jsonify({'error': 'Sección no encontrada'}), 404
     except Exception:
         return jsonify({'error': 'Error interno del servidor'}), 500
+
 # --- API para alumnos ---
 @app.route('/api/alumnos')
 def api_alumnos():
@@ -219,7 +123,7 @@ def api_alumnos():
 # --- API para anuncios ---
 @app.route('/api/anuncios', methods=['GET'])
 def api_anuncios():
-    conn = sqlite3.connect(DATABASE_USUARIOS)
+    conn = sqlite3.connect(DATABASE_LIBROS)
     conn.row_factory = sqlite3.Row
     anuncios = conn.execute('SELECT * FROM anuncios ORDER BY fecha DESC').fetchall()
     conn.close()
@@ -234,7 +138,7 @@ def agregar_anuncio():
     mensaje = data.get('mensaje')
     if not fecha or not mensaje:
         return jsonify({'error': 'Datos incompletos'}), 400
-    conn = sqlite3.connect(DATABASE_USUARIOS)
+    conn = sqlite3.connect(DATABASE_LIBROS)
     c = conn.cursor()
     c.execute('INSERT INTO anuncios (fecha, mensaje) VALUES (?, ?)', (fecha, mensaje))
     conn.commit()
@@ -245,14 +149,56 @@ def agregar_anuncio():
 def eliminar_anuncio(anuncio_id):
     if 'usuario' not in session:
         return jsonify({'error': 'No autorizado'}), 401
-    conn = sqlite3.connect(DATABASE_USUARIOS)
+    conn = sqlite3.connect(DATABASE_LIBROS)
     c = conn.cursor()
     c.execute('DELETE FROM anuncios WHERE id=?', (anuncio_id,))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
 
-init_db()
+# --- Decorador para rutas protegidas ---
+def login_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'usuario' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Aplicar decorador a rutas protegidas
+@app.route('/panel')
+@login_required
+def panel():
+    return render_template('panel.html')
+
+@app.route('/gestion')
+@login_required
+def gestion():
+    return render_template('gestion-libros.html')
+
+@app.route('/anuncios')
+@login_required
+def anuncios():
+    return render_template('gestion-anuncios.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        contrasena = request.form['contrasena']
+        if validar_usuario(usuario, contrasena):
+            session['usuario'] = usuario
+            return redirect(url_for('panel'))
+        else:
+            error = 'Claves incorrectas'
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
