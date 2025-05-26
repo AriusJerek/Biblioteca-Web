@@ -71,9 +71,9 @@
     document.getElementById('buscador-libros').addEventListener('input', function () {
       const texto = this.value.toLowerCase();
       const filtrados = todosLosLibros.filter(libro =>
-        libro.nombre.toLowerCase().includes(texto) ||
-        libro.autor.toLowerCase().includes(texto) ||
-        libro.categoria.toLowerCase().includes(texto)
+        (libro.nombre || '').toLowerCase().includes(texto) ||
+        (libro.autor || '').toLowerCase().includes(texto) ||
+        (libro.categoria || '').toLowerCase().includes(texto)
       );
       mostrarLibros(filtrados);
     });
