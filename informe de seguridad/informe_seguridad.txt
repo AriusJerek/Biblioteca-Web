@@ -84,3 +84,22 @@ Recomendaciones Adicionales
 - Revisar permisos de archivos y bases de datos en el servidor.
 - Mantener actualizadas las dependencias de Python y JS.
 - Revisar y auditar periódicamente los logs de acceso y errores.
+
+---
+
+[26/05/2025] Mejoras y correcciones recientes:
+
+1. Corrección y migración de tablas de libros:
+   - Se implementaron scripts para normalizar y migrar la estructura de todas las tablas de libros (libros_000 a libros_900), asegurando la presencia de todas las columnas requeridas y el campo id autoincremental, incluso después de importaciones desde Excel.
+   - Se automatizó la eliminación de tablas temporales (_old) para evitar bloqueos y errores de migración.
+   - Se garantiza que la columna 'codigo' acepte cualquier carácter (números, letras, símbolos como . / , -) sin errores ni restricciones innecesarias.
+
+2. Importación robusta desde Excel:
+   - El importador de Excel ahora reconoce nombres alternativos de columnas (por ejemplo, 'código', 'Codigo', 'portada', 'categoría', etc.) y los normaliza automáticamente, evitando errores por encabezados inconsistentes.
+   - Se asegura la conservación de datos al corregir la estructura, evitando pérdidas tras la importación.
+
+3. Manejo de errores y consistencia:
+   - Se mejoró la detección y limpieza de tablas temporales para evitar conflictos en migraciones repetidas.
+   - Se reforzó la validación de estructura y la migración de datos para que el sistema siempre funcione tras cualquier importación o corrección.
+
+Estas acciones refuerzan la robustez, la integridad de los datos y la experiencia de administración, minimizando errores y facilitando la recuperación ante fallos o inconsistencias en la base de datos.
