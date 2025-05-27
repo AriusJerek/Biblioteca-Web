@@ -6,11 +6,13 @@ Sistema de gestión y visualización del material de la biblioteca.
 Este proyecto es una aplicación web para la administración y consulta de libros, anuncios y alumnos de una biblioteca. Permite a los usuarios autenticados gestionar el catálogo de libros, publicar anuncios y visualizar información relevante. Los visitantes pueden explorar el catálogo y ver anuncios públicos.
 
 ## Características principales
-- Visualización de catálogo de libros por secciones.
+- Visualización de catálogo de libros por secciones, con vista previa atractiva.
 - Búsqueda de libros por nombre, autor o categoría.
-- Gestión de libros (agregar/eliminar) para administradores.
-- Gestión de anuncios y novedades.
-- Listado de alumnos registrados.
+- Visualización de anuncios y novedades públicas.
+- Página pública para alumnos y visitantes con catálogo y anuncios.
+- Gestión de libros (agregar, editar, eliminar) para administradores.
+- Gestión de anuncios y novedades (solo administradores).
+- Listado de alumnos registrados (solo administradores).
 - Autenticación de usuarios para acceso administrativo.
 
 ## Tecnologías utilizadas
@@ -51,6 +53,15 @@ Este proyecto es una aplicación web para la administración y consulta de libro
   - `crea_usuario.py`: Crea usuarios administradores.
   - `excel_a_sql.py`: Importa datos desde Excel a la base de datos.
   - `corregir_tablas.py`: Corrige estructura de tablas si es necesario.
+
+## Público general y alumnos
+- El catálogo y los anuncios son accesibles para cualquier visitante.
+- La página pública muestra los libros en formato de tarjetas con imagen, nombre, autor y categoría.
+- Los alumnos pueden buscar libros y ver novedades sin necesidad de iniciar sesión.
+
+## Administración
+- El acceso a la gestión de libros, anuncios y alumnos está protegido por autenticación.
+- Solo los usuarios administradores pueden modificar el catálogo y los anuncios.
 
 ## Créditos
 Desarrollado por el estudiante - Josias Asael Alvarez Jara.
