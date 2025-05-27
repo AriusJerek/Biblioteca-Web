@@ -23,7 +23,9 @@
     <option value="900">Sección 900</option>
   </select>
   <input type="text" id="buscador-libros" placeholder="Buscar libro, autor o categoría">
-  <div id="libros"></div>
+  <div class="catalogo-grid">
+    <div id="libros"></div>
+  </div>
   
   <script>
   // Cargar la barra de navegación desde navbar.html
@@ -52,11 +54,16 @@
       contenedor.innerHTML = '';
       libros.forEach(libro => {
         const div = document.createElement('div');
-        div.className = 'libro';
+        div.className = 'libro-preview';
         div.innerHTML = `
-          <h3>${libro.nombre}</h3>
-          <p><strong>Autor:</strong> ${libro.autor}</p>
-          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada del libro" style="max-width:120px;">` : ''}
+          <div class="libro-img">
+            ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada del libro">` : '<div class="img-placeholder">Sin imagen</div>'}
+          </div>
+          <div class="libro-info">
+            <h3>${libro.nombre}</h3>
+            <p class="autor">${libro.autor}</p>
+            <p class="categoria">${libro.categoria || ''}</p>
+          </div>
         `;
         contenedor.appendChild(div);
       });

@@ -30,9 +30,6 @@ def inicio():
 def catalogo():
     return render_template('catalogo.html')
 
-@app.route('/alumnos')
-def alumnos():
-    return render_template('alumnos.html')
 
 # --- API para libros por sección ---
 @app.route('/api/libros/<seccion>', methods=['GET'])
@@ -218,6 +215,11 @@ def panel():
 @login_required
 def gestion():
     return render_template('gestion-libros.html')
+
+@app.route('/alumnos')
+@login_required
+def alumnos():
+    return render_template('alumnos.html')
 
 @app.route('/anuncios')
 @login_required
