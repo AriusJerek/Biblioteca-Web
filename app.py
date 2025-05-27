@@ -136,10 +136,23 @@ def eliminar_libro_seccion(seccion, libro_id):
     try:
         with sqlite3.connect(DATABASE_LIBROS) as conn:
             c = conn.cursor()
+            # Obtener la ruta de la imagen antes de eliminar
+            c.execute(f'SELECT imagen FROM {tabla} WHERE id=?', (libro_id,))
+            row = c.fetchone()
+            imagen = row[0] if row else None
+            # Eliminar el libro
             c.execute(f'DELETE FROM {tabla} WHERE id=?', (libro_id,))
             conn.commit()
             if c.rowcount == 0:
                 return jsonify({'error': 'Libro no encontrado'}), 404
+            # Eliminar la imagen física si es local
+            if imagen and imagen.startswith('/static/img/libros/') and not imagen.startswith('http'):
+                ruta_fisica = imagen.lstrip('/')
+                if os.path.exists(ruta_fisica):
+                    try:
+                        os.remove(ruta_fisica)
+                    except Exception:
+                        pass  # Ignorar errores al borrar archivo
             return jsonify({'success': True})
     except sqlite3.OperationalError:
         return jsonify({'error': 'Sección no encontrada'}), 404
