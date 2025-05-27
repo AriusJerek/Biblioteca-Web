@@ -28,13 +28,11 @@
   </div>
   
   <script>
-  // Cargar la barra de navegación desde navbar.html
-  fetch("/static/navbar.html")
+    fetch("/static/navbar.html")
     .then(res => res.text())
     .then(html => {
       document.getElementById("navbar-container").innerHTML = html;
-    });
-  </script>
+    });</script>
 
   <script>
     let todosLosLibros = [];

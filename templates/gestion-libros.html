@@ -50,7 +50,9 @@
 </section>
     <section class="lista-libros">
       <h2>Libros actuales</h2>
-      <ul id="listaLibros"></ul>
+      <div class="catalogo-grid">
+        <div id="listaLibros"></div>
+      </div>
     </section>
   </main>
 
@@ -83,29 +85,28 @@
     }
 
     function mostrarLibros(libros) {
-      const lista = document.getElementById('listaLibros');
-      lista.innerHTML = '';
+      const contenedor = document.getElementById('listaLibros');
+      contenedor.innerHTML = '';
       if (libros.length === 0) {
-        lista.innerHTML = '<li>No hay libros registrados.</li>';
+        contenedor.innerHTML = '<div>No hay libros registrados.</div>';
         return;
       }
       libros.forEach(libro => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <strong>${libro.nombre}</strong> <br>
-          <span><b>Autor:</b> ${libro.autor}</span> <br>
-          <span><b>Cantidad:</b> ${libro.cantidad}</span> <br>
-          <span><b>Categoría:</b> ${libro.categoria}</span> <br>
-          <span><b>Código:</b> ${libro.codigo}</span> <br>
-          <span><b>Estado:</b> ${libro.estado}</span> <br>
-          <span><b>Origen:</b> ${libro.origen}</span> <br>
-          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada" style="max-width:80px;" onerror="this.onerror=null;this.src='/static/img/logo.png'">` : ''}
-          <div class="acciones">
-            <button onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
-            <button onclick="editarLibro(${libro.id})">✏️ Editar</button>
+        const div = document.createElement('div');
+        div.className = 'libro-preview';
+        div.innerHTML = `
+          <div class="libro-info">
+            <h3>${libro.nombre}</h3>
+            <p class="autor">${libro.autor}</p>
+            <p class="categoria">${libro.categoria || ''}</p>
+            <p class="cantidad"><b>Cantidad:</b> ${libro.cantidad}</p>
+            <div class="acciones">
+              <button onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
+              <button onclick="editarLibro(${libro.id})">✏️ Editar</button>
+            </div>
           </div>
         `;
-        lista.appendChild(li);
+        contenedor.appendChild(div);
       });
     }
 
