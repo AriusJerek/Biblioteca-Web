@@ -175,9 +175,22 @@ header p {
   transition: background-color 0.3s ease;
 }
 
+.lista-libros {
+  display: contents;
+}
+
+.lista-libros div {
+  background: unset;
+  border: unset;
+  border-radius: unset;
+  box-shadow: unset;
+  margin: unset;
+  padding: unset;
+  max-width: unset;
+}
+
 .lista-libros ul {
-  list-style: none;
-  padding: 0;
+  display: none;
 }
 
 .lista-libros li {
@@ -902,4 +915,25 @@ main {
 .libro-info .categoria {
   font-size: 0.93em;
   color: #888;
+}
+
+.lista-libros .catalogo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px;
+  margin: 30px 0 40px 0;
+}
+
+#listaLibros {
+  display: contents;
+}
+
+#listaLibros > div {
+  background: unset;
+  border: unset;
+  border-radius: unset;
+  box-shadow: unset;
+  margin: unset;
+  padding: unset;
+  max-width: unset;
 }
