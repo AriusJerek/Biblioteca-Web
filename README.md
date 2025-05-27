@@ -24,23 +24,46 @@ Este proyecto es una aplicación web para la administración y consulta de libro
 
 ## Instalación y requisitos
 1. **Clona el repositorio o descarga los archivos.**
-2. Instala las dependencias necesarias:
-   ```bash
-   pip install flask bcrypt pandas
-   ```
-3. Asegúrate de tener Python 3 instalado.
-4. Crea las bases de datos y tablas ejecutando los scripts:
-   ```bash
-   python crear_tablas_libros.py
-   python crea_usuario.py
-   python excel_a_sql.py
-   ```
-   (Sigue las instrucciones para crear un usuario administrador y cargar los datos de libros/alumnos desde el Excel.)
-5. Inicia la aplicación:
-   ```bash
-   python app.py
-   ```
-6. Accede a `http://localhost:5000` desde tu navegador.
+2. **(Opción 1: Instalación tradicional)**
+   - Instala las dependencias necesarias:
+     ```bash
+     pip install flask bcrypt pandas
+     ```
+   - Asegúrate de tener Python 3 instalado.
+   - Crea las bases de datos y tablas ejecutando los scripts:
+     ```bash
+     python crear_tablas_libros.py
+     python crea_usuario.py
+     python excel_a_sql.py
+     ```
+     (Sigue las instrucciones para crear un usuario administrador y cargar los datos de libros/alumnos desde el Excel.)
+   - Inicia la aplicación:
+     ```bash
+     python app.py
+     ```
+   - Accede a `http://localhost:5000` desde tu navegador.
+
+3. **(Opción 2: Usar Docker - Recomendado para portabilidad)**
+   - Asegúrate de tener [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado en tu máquina.
+   - Abre una terminal en la carpeta del proyecto (donde está el `Dockerfile`).
+   - Construye la imagen Docker:
+     ```powershell
+     docker build -t biblioteca-web .
+     ```
+   - Ejecuta el contenedor, montando la carpeta `database/` para persistencia de datos:
+     ```powershell
+     docker run -p 5000:5000 -v ${PWD}\database:/app/database biblioteca-web
+     ```
+     > Si usas Linux/Mac, reemplaza la barra invertida por barra normal: `${PWD}/database:/app/database`
+   - Accede a `http://localhost:5000` desde tu navegador.
+   - Si necesitas crear las tablas o cargar datos, ejecuta los scripts auxiliares dentro del contenedor o en tu máquina antes de iniciar la app.
+
+4. **Variables de entorno (opcional)**
+   - Puedes definir la clave secreta de Flask al ejecutar el contenedor:
+     ```powershell
+     docker run -p 5000:5000 -v ${PWD}\database:/app/database -e SECRET_KEY=miclave biblioteca-web
+     ```
+   - Asegúrate de que tu `app.py` lea la variable de entorno `SECRET_KEY` (ya preparado en el código si seguiste las recomendaciones).
 
 ## Estructura del proyecto
 - `app.py`: Aplicación principal Flask.
