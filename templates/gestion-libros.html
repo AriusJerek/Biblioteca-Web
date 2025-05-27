@@ -31,7 +31,7 @@
         <option value="900">Sección 900</option>
       </select>
       <h2>Agregar nuevo libro</h2>
-      <form id="formAgregarLibro">
+      <form id="formAgregarLibro" enctype="multipart/form-data">
         <input type="number" id="cantidad" placeholder="Cantidad" min="1" required>
         <input type="text" id="codigo" placeholder="Código" required>
         <input type="text" id="categoria" placeholder="Categoría" required>
@@ -40,6 +40,7 @@
         <input type="text" id="estado" placeholder="Estado" required>
         <input type="text" id="origen" placeholder="Origen" required>
         <input type="url" id="imagen" placeholder="URL de imagen de portada (opcional)">
+        <input type="file" id="imagenArchivo" accept="image/*">
         <button type="submit">Agregar Libro</button>
       </form>
     </section>
@@ -135,15 +136,30 @@
       const autor = document.getElementById('autor').value.trim();
       const estado = document.getElementById('estado').value.trim();
       const origen = document.getElementById('origen').value.trim();
-      const imagen = document.getElementById('imagen').value.trim();
+      const imagenUrl = document.getElementById('imagen').value.trim();
+      const imagenArchivo = document.getElementById('imagenArchivo').files[0];
       if (!cantidad || !nombre || !autor || !categoria || !codigo || !estado || !origen) return;
       const btn = this.querySelector('button[type="submit"]');
       btn.disabled = true;
       btn.textContent = 'Agregando...';
+
+      const formData = new FormData();
+      formData.append('cantidad', cantidad);
+      formData.append('codigo', codigo);
+      formData.append('categoria', categoria);
+      formData.append('nombre', nombre);
+      formData.append('autor', autor);
+      formData.append('estado', estado);
+      formData.append('origen', origen);
+      if (imagenArchivo) {
+        formData.append('imagenArchivo', imagenArchivo);
+      } else if (imagenUrl) {
+        formData.append('imagen', imagenUrl);
+      }
+
       fetch(`/api/libros/${seccion}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cantidad: Number(cantidad), codigo, categoria, nombre, autor, estado, origen, imagen })
+        body: formData
       })
       .then(res => res.json().then(data => ({status: res.status, data})))
       .then(({status, data}) => {

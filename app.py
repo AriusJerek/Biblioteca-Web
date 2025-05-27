@@ -2,12 +2,18 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import sqlite3
 import bcrypt
 import re
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = '131619'
 
 DATABASE_USUARIOS = 'database/usuarios.db'
 DATABASE_LIBROS = 'database/basedatos.db'
+
+UPLOAD_FOLDER = 'static/img/libros'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Validación de usuario para login
 def validar_usuario(username, password):
@@ -20,6 +26,9 @@ def validar_usuario(username, password):
         hashed = resultado[0]
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
     return False
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- Vistas ---
 @app.route('/')
@@ -49,22 +58,51 @@ def api_libros_seccion(seccion):
 def agregar_libro_seccion(seccion):
     if 'usuario' not in session:
         return jsonify({'error': 'No autorizado'}), 401
-    # Validar que la sección solo contenga dígitos (ej: '000', '100', etc.)
     if not re.fullmatch(r'\d{3}', seccion):
         return jsonify({'error': 'Sección inválida'}), 400
-    data = request.get_json()
-    cantidad = data.get('cantidad')
-    codigo = data.get('codigo')
-    categoria = data.get('categoria')
-    nombre = data.get('nombre')
-    autor = data.get('autor')
-    estado = data.get('estado')
-    origen = data.get('origen')
-    imagen = data.get('imagen')
+    # Soporta tanto JSON como multipart/form-data
+    if request.content_type and request.content_type.startswith('multipart/form-data'):
+        form = request.form
+        files = request.files
+        cantidad = form.get('cantidad')
+        codigo = form.get('codigo')
+        categoria = form.get('categoria')
+        nombre = form.get('nombre')
+        autor = form.get('autor')
+        estado = form.get('estado')
+        origen = form.get('origen')
+        imagen_url = form.get('imagen')
+        imagen_file = files.get('imagenArchivo')
+        imagen = None
+        if imagen_file and allowed_file(imagen_file.filename):
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+            filename = secure_filename(imagen_file.filename)
+            ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            # Evitar sobrescribir archivos
+            base, ext = os.path.splitext(filename)
+            i = 1
+            while os.path.exists(ruta):
+                filename = f"{base}_{i}{ext}"
+                ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                i += 1
+            imagen_file.save(ruta)
+            imagen = '/' + ruta.replace('\\', '/').replace('static/', 'static/')
+        elif imagen_url:
+            imagen = imagen_url
+    else:
+        data = request.get_json()
+        cantidad = data.get('cantidad')
+        codigo = data.get('codigo')
+        categoria = data.get('categoria')
+        nombre = data.get('nombre')
+        autor = data.get('autor')
+        estado = data.get('estado')
+        origen = data.get('origen')
+        imagen = data.get('imagen')
     # Validar campos obligatorios
     if not all([nombre, autor, categoria, codigo, estado, origen, cantidad]):
         return jsonify({'error': 'Datos incompletos'}), 400
-    # Validar que cantidad sea un entero positivo
     try:
         cantidad = int(cantidad)
         if cantidad < 1:
@@ -85,8 +123,8 @@ def agregar_libro_seccion(seccion):
         return jsonify({'error': 'Sección no encontrada'}), 404
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Error de integridad en los datos'}), 400
-    except Exception:
-        return jsonify({'error': 'Error interno del servidor'}), 500
+    except Exception as e:
+        return jsonify({'error': 'Error interno del servidor', 'detalle': str(e)}), 500
 
 @app.route('/api/libros/<seccion>/<int:libro_id>', methods=['DELETE'])
 def eliminar_libro_seccion(seccion, libro_id):
