@@ -65,6 +65,85 @@ Este proyecto es una aplicación web para la administración y consulta de libro
      ```
    - Asegúrate de que tu `app.py` lea la variable de entorno `SECRET_KEY` (ya preparado en el código si seguiste las recomendaciones).
 
+## Guía rápida para instalar y ejecutar en otra máquina
+
+### Opción 1: Instalación tradicional (sin Docker)
+
+1. **Instala Python 3**  
+   Descarga e instala Python 3 desde [python.org](https://www.python.org/downloads/).
+
+2. **Descarga o copia el proyecto**  
+   Copia toda la carpeta del proyecto (incluyendo `app.py`, `database/`, `static/`, `templates/`, etc.) a la nueva máquina.
+
+3. **Crea un entorno virtual (opcional pero recomendado)**
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\activate
+   ```
+
+4. **Instala las dependencias**
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+5. **Crea las bases de datos y tablas si es necesario**  
+   Ejecuta los scripts auxiliares:
+   ```powershell
+   python crear_tablas_libros.py
+   python crea_usuario.py
+   python excel_a_sql.py
+   ```
+   (Sigue las instrucciones para crear un usuario administrador y cargar los datos.)
+
+6. **Inicia la aplicación**
+   ```powershell
+   python app.py
+   ```
+
+7. **Abre tu navegador**  
+   Ve a [http://localhost:5000](http://localhost:5000)
+
+---
+
+### Opción 2: Instalación usando Docker (recomendado para portabilidad)
+
+1. **Instala Docker Desktop**  
+   Descárgalo desde [docker.com](https://www.docker.com/products/docker-desktop/) e instálalo.
+
+2. **Descarga o copia el proyecto**  
+   Copia toda la carpeta del proyecto a la nueva máquina.
+
+3. **(Si la imagen Docker la exportaste/importaste)**
+   Si la imagen la creaste en otra máquina y la exportaste, impórtala así:
+   ```powershell
+   docker load -i biblioteca-web.tar
+   ```
+   (Salta este paso si la imagen ya está en la nueva máquina.)
+
+4. **Abre una terminal en la carpeta del proyecto**
+
+5. **Ejecuta el contenedor con persistencia de base de datos**
+   ```powershell
+   docker run -p 5000:5000 -v ${PWD}\database:/app/database biblioteca-web
+   ```
+   > Si usas Linux/Mac, usa `${PWD}/database:/app/database`
+
+6. **Abre tu navegador**  
+   Ve a [http://localhost:5000](http://localhost:5000)
+
+7. **(Opcional) Ejecuta scripts auxiliares**  
+   Si necesitas crear tablas o cargar datos, ejecuta los scripts (`crear_tablas_libros.py`, etc.) dentro del contenedor o en tu máquina antes de iniciar la app.
+
+---
+
+### Variables de entorno (opcional)
+
+Puedes definir la clave secreta de Flask al ejecutar el contenedor:
+```powershell
+docker run -p 5000:5000 -v ${PWD}\database:/app/database -e SECRET_KEY=miclave biblioteca-web
+```
+Asegúrate de que tu `app.py` lea la variable de entorno `SECRET_KEY`.
+
 ## Estructura del proyecto
 - `app.py`: Aplicación principal Flask.
 - `database/`: Bases de datos SQLite (`basedatos.db`, `usuarios.db`).
