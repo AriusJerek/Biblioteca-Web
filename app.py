@@ -210,6 +210,27 @@ def api_alumnos():
     conn.close()
     return jsonify([dict(alumno) for alumno in alumnos])
 
+# --- API para agregar alumno ---
+@app.route('/api/alumnos', methods=['POST'])
+def agregar_alumno():
+    if 'usuario' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    data = request.get_json()
+    nombre = data.get('nombre')
+    codigo = data.get('codigo')
+    if not nombre or not codigo:
+        return jsonify({'error': 'Datos incompletos'}), 400
+    try:
+        with sqlite3.connect(DATABASE_LIBROS) as conn:
+            c = conn.cursor()
+            c.execute('INSERT INTO alumnos (nombre, codigo) VALUES (?, ?)', (nombre, codigo))
+            conn.commit()
+        return jsonify({'success': True}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({'error': 'Código de alumno duplicado'}), 400
+    except Exception as e:
+        return jsonify({'error': 'Error interno del servidor', 'detalle': str(e)}), 500
+
 # --- API para anuncios ---
 @app.route('/api/anuncios', methods=['GET'])
 def api_anuncios():

@@ -973,16 +973,99 @@ main {
   line-height: 1.6;
 }
 
+/* === Estilos para la sección de alumnos === */
+#alumnos {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+#alumnos > div {
+  background: #f8f9fa;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 18px 22px;
+  min-width: 220px;
+  max-width: 320px;
+  flex: 1 1 220px;
+  transition: box-shadow 0.2s;
+}
+#alumnos > div:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  border-color: #a3a3a3;
+}
+#alumnos p {
+  margin: 6px 0;
+  font-size: 1.05em;
+}
+#alumnos hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 10px 0 0 0;
+}
+#form-agregar-alumno {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+  margin-bottom: 0;
+}
+#form-agregar-alumno input[type="text"] {
+  padding: 7px 10px;
+  border: 1px solid #bdbdbd;
+  border-radius: 5px;
+  font-size: 1em;
+  outline: none;
+  transition: border 0.2s;
+}
+#form-agregar-alumno input[type="text"]:focus {
+  border-color: #1976d2;
+}
+#form-agregar-alumno button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#form-agregar-alumno button:hover {
+  background: #125ea2;
+}
+#mensaje-alumno {
+  font-size: 1em;
+  min-width: 120px;
+  display: inline-block;
+}
+#buscador-alumnos {
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  border: 1px solid #bdbdbd;
+  border-radius: 5px;
+  font-size: 1em;
+  width: 260px;
+  outline: none;
+  transition: border 0.2s;
+}
+#buscador-alumnos:focus {
+  border-color: #1976d2;
+}
+.alumnos-flex {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.alumnos-col {
+  flex: 1 1 320px;
+  min-width: 300px;
+  max-width: 420px;
+}
 @media (max-width: 900px) {
-  .principal-flex {
-    flex-direction: column;
-    gap: 24px;
-  }
-  .novedades-lateral, .seccion-normas {
-    max-width: 100%;
-    width: 100%;
-  }
-  .novedades-lateral {
-    margin-bottom: 0;
-  }
+  .alumnos-flex { flex-direction: column; gap: 18px; }
+  .alumnos-col { max-width: 100%; }
 }

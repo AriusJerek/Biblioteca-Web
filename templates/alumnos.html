@@ -10,8 +10,21 @@
 <a href="/panel" class="btn-volver">🏠 Volver al Panel</a>
   <h1>Alumnos Registrados con Código</h1>
 
-  <input type="text" id="buscador-alumnos" placeholder="Buscar nombre o código">
-  <div id="alumnos"></div>
+  <div class="alumnos-flex">
+    <div class="alumnos-col">
+      <form id="form-agregar-alumno" style="margin-bottom:20px">
+        <h2 style="margin-top:0">Agregar alumno</h2>
+        <input type="text" id="nuevo-nombre" placeholder="Nombre del alumno" required>
+        <input type="text" id="nuevo-codigo" placeholder="Código del alumno" required>
+        <button type="submit">Agregar alumno</button>
+        <span id="mensaje-alumno" style="color:green;margin-left:10px"></span>
+      </form>
+    </div>
+    <div class="alumnos-col">
+      <input type="text" id="buscador-alumnos" placeholder="Buscar nombre o código">
+      <div id="alumnos"></div>
+    </div>
+  </div>
 
   <script>
     let todosLosAlumnos = [];
@@ -26,6 +39,10 @@
     function mostrarAlumnos(alumnos) {
       const contenedor = document.getElementById('alumnos');
       contenedor.innerHTML = '';
+      if (alumnos.length === 0) {
+        contenedor.innerHTML = '<p style="color:gray">No hay alumnos registrados.</p>';
+        return;
+      }
       alumnos.forEach(alumno => {
         const div = document.createElement('div');
         div.innerHTML = `
@@ -44,6 +61,47 @@
         alumno.codigo.toLowerCase().includes(texto)
       );
       mostrarAlumnos(filtrados);
+    });
+
+    // Agregar alumno
+    document.getElementById('form-agregar-alumno').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('nuevo-nombre').value.trim();
+      const codigo = document.getElementById('nuevo-codigo').value.trim();
+      const mensaje = document.getElementById('mensaje-alumno');
+      mensaje.textContent = '';
+      if (!nombre || !codigo) {
+        mensaje.style.color = 'red';
+        mensaje.textContent = 'Completa ambos campos.';
+        return;
+      }
+      fetch('/api/alumnos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, codigo })
+      })
+      .then(res => res.json().then(data => ({status: res.status, body: data})))
+      .then(res => {
+        if (res.status === 201) {
+          mensaje.style.color = 'green';
+          mensaje.textContent = 'Alumno agregado.';
+          // Recargar lista
+          fetch('/api/alumnos')
+            .then(res => res.json())
+            .then(data => {
+              todosLosAlumnos = data;
+              mostrarAlumnos(data);
+            });
+          document.getElementById('form-agregar-alumno').reset();
+        } else {
+          mensaje.style.color = 'red';
+          mensaje.textContent = res.body.error || 'Error al agregar.';
+        }
+      })
+      .catch(() => {
+        mensaje.style.color = 'red';
+        mensaje.textContent = 'Error de red.';
+      });
     });
   </script>
 
