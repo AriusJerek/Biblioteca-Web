@@ -924,16 +924,65 @@ main {
   margin: 30px 0 40px 0;
 }
 
-#listaLibros {
-  display: contents;
+/* Flex principal para la página de inicio */
+.principal-flex {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
 }
 
-#listaLibros > div {
-  background: unset;
-  border: unset;
-  border-radius: unset;
-  box-shadow: unset;
-  margin: unset;
-  padding: unset;
-  max-width: unset;
+.novedades-lateral {
+  flex: 0 0 320px;
+  max-width: 340px;
+  min-width: 240px;
+  margin: 0;
+  background: #f0f8ff;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.08);
+  padding: 20px 18px;
+  text-align: left;
+}
+
+.seccion-normas {
+  flex: 1 1 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.07);
+  padding: 32px 28px;
+  margin: 0;
+  text-align: left;
+}
+
+.seccion-normas h2 {
+  color: #0077cc;
+  margin-bottom: 18px;
+  font-size: 1.5em;
+}
+
+.seccion-normas ul {
+  list-style: disc inside;
+  font-size: 1.1em;
+  color: #2c3e50;
+  padding-left: 18px;
+}
+
+.seccion-normas li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .principal-flex {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .novedades-lateral, .seccion-normas {
+    max-width: 100%;
+    width: 100%;
+  }
+  .novedades-lateral {
+    margin-bottom: 0;
+  }
 }
