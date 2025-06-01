@@ -48,9 +48,64 @@
         div.innerHTML = `
           <p><strong>Nombre:</strong> ${alumno.nombre}</p>
           <p><strong>Código:</strong> ${alumno.codigo}</p>
+          <button class="btn-eliminar-alumno" data-id="${alumno.id}" style="background:#e74c3c;color:#fff;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;margin-top:8px;">Eliminar</button>
           <hr>
         `;
         contenedor.appendChild(div);
+      });
+      // Asignar eventos a los botones eliminar
+      document.querySelectorAll('.btn-eliminar-alumno').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (confirm('¿Seguro que deseas eliminar este alumno?')) {
+            eliminarAlumno(this.getAttribute('data-id'));
+          }
+        });
+      });
+    }
+
+    function eliminarAlumno(id) {
+      fetch(`/api/alumnos/${id}`, { method: 'DELETE' })
+        .then(res => res.json().then(data => ({status: res.status, body: data})))
+        .then(res => {
+          if (res.status === 200) {
+            // Recargar lista
+            fetch('/api/alumnos')
+              .then(res => res.json())
+              .then(data => {
+                todosLosAlumnos = data;
+                mostrarAlumnos(data);
+              });
+          } else {
+            alert(res.body.error || 'No se pudo eliminar.');
+          }
+        })
+        .catch(() => alert('Error de red al eliminar.'));
+    }
+
+    function mostrarAlumnos(alumnos) {
+      const contenedor = document.getElementById('alumnos');
+      contenedor.innerHTML = '';
+      if (alumnos.length === 0) {
+        contenedor.innerHTML = '<p style="color:gray">No hay alumnos registrados.</p>';
+        return;
+      }
+      alumnos.forEach(alumno => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <p><strong>Nombre:</strong> ${alumno.nombre}</p>
+          <p><strong>Código:</strong> ${alumno.codigo}</p>
+          <button class="btn-eliminar-alumno" data-id="${alumno.id}" style="background:#e74c3c;color:#fff;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;margin-top:8px;">Eliminar</button>
+          <hr>
+        `;
+        contenedor.appendChild(div);
+      });
+      // Asignar eventos a los botones eliminar
+      document.querySelectorAll('.btn-eliminar-alumno').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (confirm('¿Seguro que deseas eliminar este alumno?')) {
+            eliminarAlumno(this.getAttribute('data-id'));
+          }
+        });
       });
     }
 

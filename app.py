@@ -267,6 +267,22 @@ def eliminar_anuncio(anuncio_id):
     conn.close()
     return jsonify({'success': True})
 
+# --- Eliminar alumno ---
+@app.route('/api/alumnos/<int:alumno_id>', methods=['DELETE'])
+def eliminar_alumno(alumno_id):
+    if 'usuario' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    try:
+        with sqlite3.connect(DATABASE_LIBROS) as conn:
+            c = conn.cursor()
+            c.execute('DELETE FROM alumnos WHERE id=?', (alumno_id,))
+            if c.rowcount == 0:
+                return jsonify({'error': 'Alumno no encontrado'}), 404
+            conn.commit()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': 'Error interno del servidor', 'detalle': str(e)}), 500
+
 # --- Decorador para rutas protegidas ---
 def login_required(f):
     from functools import wraps
