@@ -9,63 +9,59 @@
 </head>
 <body>
   <div id="navbar-container"></div>
-
-  <header>
-    <h1>📚 Biblioteca Virtual</h1>
-        <img src="../static/img/logo.png" alt="Logo Biblioteca Virtual" class="logo">
-    <p>Bienvenido a nuestra biblioteca en línea. <br>
-      Explora libros, autores y mucho más.</p>
-  </header>
   <div class="container">
+    <header>
+      <h1>📚 Biblioteca Virtual</h1>
+      <img src="../static/img/logo.png" alt="Logo Biblioteca Virtual" class="logo" style="max-width:120px;display:block;margin:0 auto 18px auto;">
+      <p>Bienvenido a nuestra biblioteca en línea. <br>
+        Explora libros, autores y mucho más.</p>
+    </header>
     <main class="contenido principal-flex">
+      <section id="novedades" class="seccion-novedades novedades-lateral">
+        <h2>📢 Anuncios y Novedades</h2>
+        <ul id="lista-novedades"></ul>
+      </section>
+      <section id="normas" class="seccion-normas">
+        <h2>📖 Normas de la Biblioteca</h2>
+        <ul>
+          <li>Respetar el silencio dentro de la biblioteca.</li>
+          <li>Cuidar los libros y devolverlos en buen estado.</li>
+          <li>No consumir alimentos ni bebidas cerca de los libros.</li>
+          <li>Respetar los horarios de préstamo y devolución.</li>
+          <li>Mantener el orden y la limpieza en las instalaciones.</li>
+        </ul>
+      </section>
+    </main>
+    <footer class="footer">
+      <p>&copy; 2025 Biblioteca Virtual. Todos los derechos reservados.</p>
+    </footer>
+  </div>
 
-    <section id="novedades" class="seccion-novedades novedades-lateral">
-      <h2>📢 Anuncios y Novedades</h2>
-      <ul id="lista-novedades"></ul>
-    </section>
-
-    <section id="normas" class="seccion-normas">
-      <h2>📖 Normas de la Biblioteca</h2>
-      <ul>
-        <li>Respetar el silencio dentro de la biblioteca.</li>
-        <li>Cuidar los libros y devolverlos en buen estado.</li>
-        <li>No consumir alimentos ni bebidas cerca de los libros.</li>
-        <li>Respetar los horarios de préstamo y devolución.</li>
-        <li>Mantener el orden y la limpieza en las instalaciones.</li>
-      </ul>
-    </section>
-
-  </main>
-  <footer class="footer">
-    <p>&copy; 2025 Biblioteca Virtual. Todos los derechos reservados.</p>
-  </footer>
-</div>
-
-<script>
-  // Cargar la barra de navegación desde navbar.html
-  fetch("/static/navbar.html")
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById("navbar-container").innerHTML = html;
-    });
-</script>
-<script>
-  // Mostrar anuncios públicos desde la API
-  function cargarNovedades() {
-    fetch('/api/anuncios')
-      .then(res => res.json())
-      .then(anuncios => {
-        const lista = document.getElementById('lista-novedades');
-        lista.innerHTML = '';
-        anuncios.forEach(anuncio => {
-          const li = document.createElement('li');
-          li.innerHTML = `<strong>${anuncio.fecha}:</strong> ${anuncio.mensaje}`;
-          lista.appendChild(li);
-        });
+  <script>
+    // Cargar la barra de navegación desde navbar.html
+    fetch("/static/navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
       });
-  }
-  cargarNovedades();
-</script>
+  </script>
+  <script>
+    // Mostrar anuncios públicos desde la API
+    function cargarNovedades() {
+      fetch('/api/anuncios')
+        .then(res => res.json())
+        .then(anuncios => {
+          const lista = document.getElementById('lista-novedades');
+          lista.innerHTML = '';
+          anuncios.forEach(anuncio => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${anuncio.fecha}:</strong> ${anuncio.mensaje}`;
+            lista.appendChild(li);
+          });
+        });
+    }
+    cargarNovedades();
+  </script>
 </body>
 
 </html>

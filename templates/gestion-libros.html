@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="/static/img/favicon.png" type="image/png">
   <title>Gestión de Libros</title>
   <link rel="stylesheet" href="/static/css/estilos.css">
@@ -11,8 +10,8 @@
   <header class="titulo">
     <h1>📚 Gestión de Libros</h1>
     <p>Agrega o elimina libros del catálogo</p>
-    <a href="/panel" class="btn-volver" style="float:left; margin-top:-40px;">🏠 Volver al Panel</a>
-    <img src="/static/img/logo.png" alt="Logo Biblioteca Virtual" style="float:right; margin-top:-40px;">
+    <a href="/panel" class="btn-volver">🏠 Volver al Panel</a>
+    <img src="/static/img/logo.png" alt="Logo Biblioteca Virtual" class="logo-header">
   </header>
 
   <main>
@@ -32,37 +31,34 @@
       </select>
       <h2>Agregar nuevo libro</h2>
       <form id="formAgregarLibro" enctype="multipart/form-data">
-        <input type="number" id="cantidad" placeholder="Cantidad" min="1" required>
-        <input type="text" id="codigo" placeholder="Código" required>
-        <input type="text" id="categoria" placeholder="Categoría" required>
-        <input type="text" id="nombre" placeholder="Nombre del libro" required>
-        <input type="text" id="autor" placeholder="Autor" required>
-        <input type="text" id="estado" placeholder="Estado" required>
-        <input type="text" id="origen" placeholder="Origen" required>
-        <input type="url" id="imagen" placeholder="URL de imagen de portada (opcional)">
-        <input type="file" id="imagenArchivo" accept="image/*">
-        <button type="submit">Agregar Libro</button>
+        <input type="number" id="cantidad" class="input-form" placeholder="Cantidad" min="1" required>
+        <input type="text" id="codigo" class="input-form" placeholder="Código" required>
+        <input type="text" id="categoria" class="input-form" placeholder="Categoría" required>
+        <input type="text" id="nombre" class="input-form" placeholder="Nombre del libro" required>
+        <input type="text" id="autor" class="input-form" placeholder="Autor" required>
+        <input type="text" id="estado" class="input-form" placeholder="Estado" required>
+        <input type="text" id="origen" class="input-form" placeholder="Origen" required>
+        <input type="url" id="imagen" class="input-form" placeholder="URL de imagen de portada (opcional)">
+        <input type="file" id="imagenArchivo" class="input-form" accept="image/*">
+        <button type="submit" class="btn-agregar">Agregar Libro</button>
       </form>
     </section>
 
     <section class="busqueda-libros">
-        <p id="Sub">Buscar: Libro/Autor/Categoría:</p>
-  <input type="text" id="buscador" placeholder="Buscar por nombre, autor o categoría">
-</section>
+        <p id="Sub" class="subtitulo-busqueda">Buscar: Libro/Autor/Categoría:</p>
+        <input type="text" id="buscador" class="input-form" placeholder="Buscar por nombre, autor o categoría">
+    </section>
     <section class="lista-libros">
       <h2>Libros actuales</h2>
-      <div class="catalogo-grid">
-        <div id="listaLibros"></div>
-      </div>
+      <div class="catalogo-grid" id="listaLibros"></div>
     </section>
   </main>
 
-  <footer>
-
+  <footer class="footer">
+    <span id="footer-msg">&copy; 2025 Biblioteca Virtual. Todos los derechos reservados.</span>
   </footer>
 
   <script>
-    // Obtener y mostrar libros
     let todosLosLibros = [];
     function cargarLibros(seccion) {
       fetch(`/api/libros/${seccion}`)
@@ -96,14 +92,17 @@
         const div = document.createElement('div');
         div.className = 'libro-preview';
         div.innerHTML = `
+          <div class="libro-img">
+            ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada del libro">` : '<div class="img-placeholder">Sin imagen</div>'}
+          </div>
           <div class="libro-info">
             <h3>${libro.nombre}</h3>
             <p class="autor">${libro.autor}</p>
             <p class="categoria">${libro.categoria || ''}</p>
             <p class="cantidad"><b>Cantidad:</b> ${libro.cantidad}</p>
-            <div class="acciones">
-              <button onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
-              <button onclick="editarLibro(${libro.id})">✏️ Editar</button>
+            <div class="acciones-gestion" style="display:flex;justify-content:center;gap:10px;margin-top:10px;">
+              <button type="button" class="btn-editar" onclick="editarLibro(${libro.id})">✏️ Editar</button>
+              <button type="button" class="btn-eliminar" onclick="eliminarLibro(${libro.id})">🗑️ Eliminar</button>
             </div>
           </div>
         `;
@@ -184,25 +183,22 @@
       });
     });
 
-    // Mensaje de feedback
+    // Animación suave para feedback
     function mostrarMensaje(msg, tipo) {
       let div = document.getElementById('mensaje-feedback');
       if (!div) {
         div = document.createElement('div');
         div.id = 'mensaje-feedback';
-        div.style.position = 'fixed';
-        div.style.top = '10px';
-        div.style.right = '10px';
-        div.style.zIndex = '9999';
+        div.className = 'mensaje-feedback';
         document.body.appendChild(div);
       }
       div.textContent = msg;
-      div.style.background = tipo === 'success' ? '#4caf50' : '#f44336';
-      div.style.color = 'white';
-      div.style.padding = '10px 20px';
-      div.style.borderRadius = '5px';
-      div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-      setTimeout(() => { div.textContent = ''; }, 2000);
+      div.className = 'mensaje-feedback ' + (tipo === 'success' ? 'success' : 'error');
+      div.style.opacity = '0';
+      div.style.transition = 'opacity 0.5s';
+      setTimeout(() => { div.style.opacity = '1'; }, 10);
+      setTimeout(() => { div.style.opacity = '0'; }, 1800);
+      setTimeout(() => { div.textContent = ''; }, 2300);
     }
 
     // Eliminar libro
@@ -228,33 +224,21 @@
       if (formDiv) formDiv.remove();
       formDiv = document.createElement('div');
       formDiv.id = 'form-editar-libro';
-      formDiv.style.position = 'fixed';
-      formDiv.style.top = '50%';
-      formDiv.style.left = '50%';
-      formDiv.style.transform = 'translate(-50%, -50%)';
-      formDiv.style.background = '#fff';
-      formDiv.style.padding = '20px';
-      formDiv.style.borderRadius = '8px';
-      formDiv.style.boxShadow = '0 2px 16px rgba(0,0,0,0.3)';
-      formDiv.style.zIndex = '10000';
-      formDiv.style.maxWidth = '350px';
-      formDiv.style.width = '90%';
-      formDiv.style.overflowY = 'auto';
-      formDiv.style.maxHeight = '90vh';
+      formDiv.className = 'form-editar-libro';
       formDiv.innerHTML = `
         <h3>Editar libro</h3>
         <form id="formEditarLibro" style="display:flex;flex-direction:column;gap:8px;">
-          <input type="number" id="edit-cantidad" placeholder="Cantidad" min="1" value="${libro.cantidad || 1}" required>
-          <input type="text" id="edit-codigo" placeholder="Código" value="${libro.codigo}" required>
-          <input type="text" id="edit-categoria" placeholder="Categoría" value="${libro.categoria}" required>
-          <input type="text" id="edit-nombre" placeholder="Nombre del libro" value="${libro.nombre}" required>
-          <input type="text" id="edit-autor" placeholder="Autor" value="${libro.autor}" required>
-          <input type="text" id="edit-estado" placeholder="Estado" value="${libro.estado}" required>
-          <input type="text" id="edit-origen" placeholder="Origen" value="${libro.origen}" required>
-          <input type="url" id="edit-imagen" placeholder="URL de imagen de portada (opcional)" value="${libro.imagen || ''}">
+          <input type="number" id="edit-cantidad" class="input-form" placeholder="Cantidad" min="1" value="${libro.cantidad || 1}" required>
+          <input type="text" id="edit-codigo" class="input-form" placeholder="Código" value="${libro.codigo}" required>
+          <input type="text" id="edit-categoria" class="input-form" placeholder="Categoría" value="${libro.categoria}" required>
+          <input type="text" id="edit-nombre" class="input-form" placeholder="Nombre del libro" value="${libro.nombre}" required>
+          <input type="text" id="edit-autor" class="input-form" placeholder="Autor" value="${libro.autor}" required>
+          <input type="text" id="edit-estado" class="input-form" placeholder="Estado" value="${libro.estado}" required>
+          <input type="text" id="edit-origen" class="input-form" placeholder="Origen" value="${libro.origen}" required>
+          <input type="url" id="edit-imagen" class="input-form" placeholder="URL de imagen de portada (opcional)" value="${libro.imagen || ''}">
           <div style="display:flex;gap:10px;justify-content:flex-end;">
-            <button type="submit">Guardar cambios</button>
-            <button type="button" id="cancelar-edicion">Cancelar</button>
+            <button type="submit" class="btn-guardar">Guardar cambios</button>
+            <button type="button" id="cancelar-edicion" class="btn-cancelar">Cancelar</button>
           </div>
         </form>
       `;

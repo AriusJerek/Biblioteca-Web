@@ -23,16 +23,15 @@
     <option value="900">Sección 900</option>
   </select>
   <input type="text" id="buscador-libros" placeholder="Buscar libro, autor o categoría">
-  <div class="catalogo-grid">
-    <div id="libros"></div>
-  </div>
+  <div class="catalogo-grid" id="libros"></div>
   
   <script>
     fetch("/static/navbar.html")
     .then(res => res.text())
     .then(html => {
       document.getElementById("navbar-container").innerHTML = html;
-    });</script>
+    });
+  </script>
 
   <script>
     let todosLosLibros = [];
