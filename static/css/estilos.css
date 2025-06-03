@@ -24,6 +24,7 @@ body {
   color: var(--color-texto);
   text-align: center;
   padding: 40px;
+  padding-top: 110px;
 }
 .mt-2 { margin-top: 12px; }
 .mb-2 { margin-bottom: 12px; }
@@ -39,10 +40,16 @@ body {
   padding: 30px 40px;
   border-radius: var(--borde-radio);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: 0;
 }
 
 /* === NAVBAR === */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
   background: linear-gradient(90deg, #232b3a 0%, #3a4660 100%);
   color: #fff;
   display: flex;
@@ -84,6 +91,16 @@ body {
 @media (max-width: 700px) {
   .navbar { flex-direction: column; padding: 12px 0; }
   .navbar a, .navbar-link { margin: 6px 0; font-size: 1em; }
+}
+
+/* Ajuste para el contenido principal para que no quede oculto debajo de la navbar fija */
+@media (max-width: 700px) {
+  body {
+    padding-top: 130px;
+  }
+  .container {
+    margin-top: 0;
+  }
 }
 
 /* === BOTONES === */

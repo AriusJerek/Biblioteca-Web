@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/static/css/estilos.css">
 </head>
 <body>
-<a href="/panel" class="btn-volver">🏠 Volver al Panel</a>
+  <div id="navbar-container"></div>
   <h1>Alumnos Registrados con Código</h1>
 
   <div class="alumnos-flex">
@@ -25,7 +25,15 @@
       <div id="alumnos"></div>
     </div>
   </div>
-
+</body>
+  <script>
+    // Cargar la barra de navegación desde navbar.html
+    fetch("/static/navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
+      });
+  </script>
   <script>
     let todosLosAlumnos = [];
 
@@ -160,5 +168,4 @@
     });
   </script>
 
-</body>
 </html>

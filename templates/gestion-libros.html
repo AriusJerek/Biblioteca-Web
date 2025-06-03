@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/css/estilos.css">
 </head>
 <body>
+  <div id="navbar-container"></div>
   <header class="titulo">
     <h1>📚 Gestión de Libros</h1>
     <p>Agrega o elimina libros del catálogo</p>
@@ -53,7 +54,14 @@
       <div class="catalogo-grid" id="listaLibros"></div>
     </section>
   </main>
-
+  <script>
+    // Cargar la barra de navegación desde navbar.html
+    fetch("/static/navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
+      });
+  </script>
   <footer class="footer">
     <span id="footer-msg">&copy; 2025 Biblioteca Virtual. Todos los derechos reservados.</span>
   </footer>

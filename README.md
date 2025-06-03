@@ -149,12 +149,17 @@ Asegúrate de que tu `app.py` lea la variable de entorno `SECRET_KEY`.
 - `database/`: Bases de datos SQLite (`basedatos.db`, `usuarios.db`).
 - `static/`: Archivos estáticos (CSS, imágenes, navbar).
 - `templates/`: Plantillas HTML.
-- `libros.xlsx`, `libros_ejemplo.csv`: Datos de ejemplo para cargar libros.
+- `libros.xlsx`: Datos de ejemplo para cargar libros.
 - Scripts auxiliares:
   - `crear_tablas_libros.py`: Crea tablas de libros por sección.
   - `crea_usuario.py`: Crea usuarios administradores.
   - `excel_a_sql.py`: Importa datos desde Excel a la base de datos.
   - `corregir_tablas.py`: Corrige estructura de tablas si es necesario.
+
+### Cambios recientes
+- Se agregó una barra de navegación fija (navbar) en las páginas de administración y gestión, cargada dinámicamente desde `static/navbar.html`.
+- Mejoras visuales y de usabilidad en la interfaz de administración y catálogo.
+- Se eliminaron botones redundantes de navegación en las páginas de administración, ya que la barra superior cumple esa función.
 
 ## Público general y alumnos
 - El catálogo y los anuncios son accesibles para cualquier visitante.

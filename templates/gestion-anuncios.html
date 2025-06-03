@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/static/css/estilos.css">
 </head>
 <body>
+  <div id="navbar-container"></div>
   <div class="anuncios-container">
     <h1>📢 Gestión de Anuncios</h1>
 
@@ -23,9 +24,16 @@
       <ul id="listaAnuncios"></ul>
     </section>
   </main>
-  <a href="/panel" class="btn-volver">← Volver al Panel</a>
   </div>
 
+  <script>
+    // Cargar la barra de navegación desde navbar.html
+    fetch("/static/navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
+      });
+  </script>
   <script>
     // Mostrar anuncios desde la API
     function cargarAnuncios() {
