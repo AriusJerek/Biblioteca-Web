@@ -235,7 +235,7 @@
       formDiv.className = 'form-editar-libro';
       formDiv.innerHTML = `
         <h3>Editar libro</h3>
-        <form id="formEditarLibro" style="display:flex;flex-direction:column;gap:8px;">
+        <form id="formEditarLibro" style="display:flex;flex-direction:column;gap:12px;" enctype="multipart/form-data">
           <input type="number" id="edit-cantidad" class="input-form" placeholder="Cantidad" min="1" value="${libro.cantidad || 1}" required>
           <input type="text" id="edit-codigo" class="input-form" placeholder="Código" value="${libro.codigo}" required>
           <input type="text" id="edit-categoria" class="input-form" placeholder="Categoría" value="${libro.categoria}" required>
@@ -243,7 +243,7 @@
           <input type="text" id="edit-autor" class="input-form" placeholder="Autor" value="${libro.autor}" required>
           <input type="text" id="edit-estado" class="input-form" placeholder="Estado" value="${libro.estado}" required>
           <input type="text" id="edit-origen" class="input-form" placeholder="Origen" value="${libro.origen}" required>
-          <input type="url" id="edit-imagen" class="input-form" placeholder="URL de imagen de portada (opcional)" value="${libro.imagen || ''}">
+          <input type="file" id="edit-imagenArchivo" class="input-form" accept="image/*">
           <div style="display:flex;gap:10px;justify-content:flex-end;">
             <button type="submit" class="btn-guardar">Guardar cambios</button>
             <button type="button" id="cancelar-edicion" class="btn-cancelar">Cancelar</button>
@@ -262,11 +262,21 @@
         const autor = document.getElementById('edit-autor').value.trim();
         const estado = document.getElementById('edit-estado').value.trim();
         const origen = document.getElementById('edit-origen').value.trim();
-        const imagen = document.getElementById('edit-imagen').value.trim();
+        const imagenArchivo = document.getElementById('edit-imagenArchivo').files[0];
+        const formData = new FormData();
+        formData.append('cantidad', cantidad);
+        formData.append('codigo', codigo);
+        formData.append('categoria', categoria);
+        formData.append('nombre', nombre);
+        formData.append('autor', autor);
+        formData.append('estado', estado);
+        formData.append('origen', origen);
+        if (imagenArchivo) {
+          formData.append('imagenArchivo', imagenArchivo);
+        }
         fetch(`/api/libros/${seccion}/${id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cantidad: Number(cantidad), codigo, categoria, nombre, autor, estado, origen, imagen })
+          body: formData
         })
         .then(res => res.json().then(data => ({status: res.status, data})))
         .then(({status, data}) => {

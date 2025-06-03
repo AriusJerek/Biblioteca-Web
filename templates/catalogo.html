@@ -25,6 +25,29 @@
   <input type="text" id="buscador-libros" placeholder="Buscar libro, autor o categoría">
   <div class="catalogo-grid" id="libros"></div>
   
+  <!-- Modal para detalles del libro -->
+  <div id="modal-libro" class="modal-libro" style="display:none;">
+    <div class="modal-libro-contenido">
+      <span id="cerrar-modal-libro" class="cerrar-modal-libro">&times;</span>
+      <div id="detalle-libro"></div>
+    </div>
+  </div>
+  <style>
+    .modal-libro {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-libro-contenido {
+      background: #fff; padding: 2em; border-radius: 8px; max-width: 400px; width: 90%; position: relative;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    }
+    .cerrar-modal-libro {
+      position: absolute; top: 10px; right: 16px; font-size: 2em; cursor: pointer; color: #888;
+    }
+    .modal-libro img { max-width: 120px; display: block; margin-bottom: 1em; }
+    .modal-libro .img-placeholder { width: 120px; height: 160px; background: #eee; display: flex; align-items: center; justify-content: center; color: #888; margin-bottom: 1em; }
+    .modal-libro .detalle-campo { margin-bottom: 0.5em; }
+  </style>
   <script>
     fetch("/static/navbar.html")
     .then(res => res.text())
@@ -49,7 +72,7 @@
     function mostrarLibros(libros) {
       const contenedor = document.getElementById('libros');
       contenedor.innerHTML = '';
-      libros.forEach(libro => {
+      libros.forEach((libro, idx) => {
         const div = document.createElement('div');
         div.className = 'libro-preview';
         div.innerHTML = `
@@ -62,9 +85,39 @@
             <p class="categoria">${libro.categoria || ''}</p>
           </div>
         `;
+        // Evento para mostrar modal con detalles
+        div.addEventListener('click', function() {
+          mostrarModalLibro(libro);
+        });
         contenedor.appendChild(div);
       });
     }
+
+    function mostrarModalLibro(libro) {
+      const modal = document.getElementById('modal-libro');
+      const detalle = document.getElementById('detalle-libro');
+      detalle.innerHTML = `
+        <div style="text-align:center;">
+          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada del libro">` : '<div class="img-placeholder">Sin imagen</div>'}
+        </div>
+        <h2>${libro.nombre}</h2>
+        <div class="detalle-campo"><b>Autor:</b> ${libro.autor || ''}</div>
+        <div class="detalle-campo"><b>Categoría:</b> ${libro.categoria || ''}</div>
+        <div class="detalle-campo"><b>Código:</b> ${libro.codigo || ''}</div>
+        <div class="detalle-campo"><b>Estado:</b> ${libro.estado || ''}</div>
+        <div class="detalle-campo"><b>Origen:</b> ${libro.origen || ''}</div>
+        <div class="detalle-campo"><b>Cantidad:</b> ${libro.cantidad || ''}</div>
+        <div class="detalle-campo"><b>Sinopsis:</b> ${libro.sinopsis || ''}</div>
+      `;
+      modal.style.display = 'flex';
+    }
+    // Cerrar modal al hacer click en la X o fuera del contenido
+    document.getElementById('cerrar-modal-libro').onclick = function() {
+      document.getElementById('modal-libro').style.display = 'none';
+    };
+    document.getElementById('modal-libro').onclick = function(e) {
+      if (e.target === this) this.style.display = 'none';
+    };
 
     // Evento del selector de sección
     document.getElementById('seccion-selector').addEventListener('change', function () {

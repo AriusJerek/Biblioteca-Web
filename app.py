@@ -165,15 +165,60 @@ def editar_libro_seccion(seccion, libro_id):
         return jsonify({'error': 'No autorizado'}), 401
     if not re.fullmatch(r'\d{3}', seccion):
         return jsonify({'error': 'Sección inválida'}), 400
-    data = request.get_json()
-    cantidad = data.get('cantidad')
-    codigo = data.get('codigo')
-    categoria = data.get('categoria')
-    nombre = data.get('nombre')
-    autor = data.get('autor')
-    estado = data.get('estado')
-    origen = data.get('origen')
-    imagen = data.get('imagen')
+    # Soporta tanto JSON como multipart/form-data
+    if request.content_type and request.content_type.startswith('multipart/form-data'):
+        form = request.form
+        files = request.files
+        cantidad = form.get('cantidad')
+        codigo = form.get('codigo')
+        categoria = form.get('categoria')
+        nombre = form.get('nombre')
+        autor = form.get('autor')
+        estado = form.get('estado')
+        origen = form.get('origen')
+        imagen_url = form.get('imagen')
+        imagen_file = files.get('imagenArchivo')
+        imagen = None
+        imagen_anterior = None
+        # Obtener la imagen anterior si se va a reemplazar
+        if imagen_file and allowed_file(imagen_file.filename):
+            with sqlite3.connect(DATABASE_LIBROS) as conn:
+                c = conn.cursor()
+                c.execute(f'SELECT imagen FROM libros_{seccion} WHERE id=?', (libro_id,))
+                row = c.fetchone()
+                imagen_anterior = row[0] if row else None
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+            filename = secure_filename(imagen_file.filename)
+            ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            base, ext = os.path.splitext(filename)
+            i = 1
+            while os.path.exists(ruta):
+                filename = f"{base}_{i}{ext}"
+                ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                i += 1
+            imagen_file.save(ruta)
+            imagen = '/' + ruta.replace('\\', '/').replace('static/', 'static/')
+            # Eliminar la imagen anterior si era local y distinta
+            if imagen_anterior and imagen_anterior.startswith('/static/img/libros/') and not imagen_anterior.startswith('http') and imagen_anterior != imagen:
+                ruta_fisica = imagen_anterior.lstrip('/')
+                if os.path.exists(ruta_fisica):
+                    try:
+                        os.remove(ruta_fisica)
+                    except Exception:
+                        pass
+        elif imagen_url:
+            imagen = imagen_url
+    else:
+        data = request.get_json()
+        cantidad = data.get('cantidad')
+        codigo = data.get('codigo')
+        categoria = data.get('categoria')
+        nombre = data.get('nombre')
+        autor = data.get('autor')
+        estado = data.get('estado')
+        origen = data.get('origen')
+        imagen = data.get('imagen')
     if not all([nombre, autor, categoria, codigo, estado, origen, cantidad]):
         return jsonify({'error': 'Datos incompletos'}), 400
     try:
