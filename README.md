@@ -43,31 +43,9 @@ Este proyecto es una aplicación web para la administración y consulta de libro
      ```
    - Accede a `http://localhost:5000` desde tu navegador.
 
-3. **(Opción 2: Usar Docker - Recomendado para portabilidad)**
-   - Asegúrate de tener [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado en tu máquina.
-   - Abre una terminal en la carpeta del proyecto (donde está el `Dockerfile`).
-   - Construye la imagen Docker:
-     ```powershell
-     docker build -t biblioteca-web .
-     ```
-   - Ejecuta el contenedor, montando la carpeta `database/` para persistencia de datos:
-     ```powershell
-     docker run -p 5000:5000 -v ${PWD}\database:/app/database biblioteca-web
-     ```
-     > Si usas Linux/Mac, reemplaza la barra invertida por barra normal: `${PWD}/database:/app/database`
-   - Accede a `http://localhost:5000` desde tu navegador.
-   - Si necesitas crear las tablas o cargar datos, ejecuta los scripts auxiliares dentro del contenedor o en tu máquina antes de iniciar la app.
-
-4. **Variables de entorno (opcional)**
-   - Puedes definir la clave secreta de Flask al ejecutar el contenedor:
-     ```powershell
-     docker run -p 5000:5000 -v ${PWD}\database:/app/database -e SECRET_KEY=miclave biblioteca-web
-     ```
-   - Asegúrate de que tu `app.py` lea la variable de entorno `SECRET_KEY` (ya preparado en el código si seguiste las recomendaciones).
-
 ## Guía rápida para instalar y ejecutar en otra máquina
 
-### Opción 1: Instalación tradicional (sin Docker)
+### Opción 1: Instalación tradicional
 
 1. **Instala Python 3**  
    Descarga e instala Python 3 desde [python.org](https://www.python.org/downloads/).
@@ -102,37 +80,6 @@ Este proyecto es una aplicación web para la administración y consulta de libro
 
 7. **Abre tu navegador**  
    Ve a [http://localhost:5000](http://localhost:5000)
-
----
-
-### Opción 2: Instalación usando Docker (recomendado para portabilidad)
-
-1. **Instala Docker Desktop**  
-   Descárgalo desde [docker.com](https://www.docker.com/products/docker-desktop/) e instálalo.
-
-2. **Descarga o copia el proyecto**  
-   Copia toda la carpeta del proyecto a la nueva máquina.
-
-3. **(Si la imagen Docker la exportaste/importaste)**
-   Si la imagen la creaste en otra máquina y la exportaste, impórtala así:
-   ```powershell
-   docker load -i biblioteca-web.tar
-   ```
-   (Salta este paso si la imagen ya está en la nueva máquina.)
-
-4. **Abre una terminal en la carpeta del proyecto**
-
-5. **Ejecuta el contenedor con persistencia de base de datos**
-   ```powershell
-   docker run -p 5000:5000 -v ${PWD}\database:/app/database biblioteca-web
-   ```
-   > Si usas Linux/Mac, usa `${PWD}/database:/app/database`
-
-6. **Abre tu navegador**  
-   Ve a [http://localhost:5000](http://localhost:5000)
-
-7. **(Opcional) Ejecuta scripts auxiliares**  
-   Si necesitas crear tablas o cargar datos, ejecuta los scripts (`crear_tablas_libros.py`, etc.) dentro del contenedor o en tu máquina antes de iniciar la app.
 
 ---
 
