@@ -180,13 +180,13 @@ def editar_libro_seccion(seccion, libro_id):
         imagen_file = files.get('imagenArchivo')
         imagen = None
         imagen_anterior = None
-        # Obtener la imagen anterior si se va a reemplazar
+        # Obtener la imagen anterior si se va a reemplazar o eliminar
+        with sqlite3.connect(DATABASE_LIBROS) as conn:
+            c = conn.cursor()
+            c.execute(f'SELECT imagen FROM libros_{seccion} WHERE id=?', (libro_id,))
+            row = c.fetchone()
+            imagen_anterior = row[0] if row else None
         if imagen_file and allowed_file(imagen_file.filename):
-            with sqlite3.connect(DATABASE_LIBROS) as conn:
-                c = conn.cursor()
-                c.execute(f'SELECT imagen FROM libros_{seccion} WHERE id=?', (libro_id,))
-                row = c.fetchone()
-                imagen_anterior = row[0] if row else None
             if not os.path.exists(app.config['UPLOAD_FOLDER']):
                 os.makedirs(app.config['UPLOAD_FOLDER'])
             filename = secure_filename(imagen_file.filename)
@@ -207,8 +207,19 @@ def editar_libro_seccion(seccion, libro_id):
                         os.remove(ruta_fisica)
                     except Exception:
                         pass
+        elif imagen_url == '':  # Si se envía imagen vacía, eliminar la imagen anterior
+            if imagen_anterior and imagen_anterior.startswith('/static/img/libros/') and not imagen_anterior.startswith('http'):
+                ruta_fisica = imagen_anterior.lstrip('/')
+                if os.path.exists(ruta_fisica):
+                    try:
+                        os.remove(ruta_fisica)
+                    except Exception:
+                        pass
+            imagen = ''
         elif imagen_url:
             imagen = imagen_url
+        else:
+            imagen = imagen_anterior
     else:
         data = request.get_json()
         cantidad = data.get('cantidad')

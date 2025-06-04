@@ -104,10 +104,6 @@
         <div class="detalle-campo"><b>Autor:</b> ${libro.autor || ''}</div>
         <div class="detalle-campo"><b>Categoría:</b> ${libro.categoria || ''}</div>
         <div class="detalle-campo"><b>Código:</b> ${libro.codigo || ''}</div>
-        <div class="detalle-campo"><b>Estado:</b> ${libro.estado || ''}</div>
-        <div class="detalle-campo"><b>Origen:</b> ${libro.origen || ''}</div>
-        <div class="detalle-campo"><b>Cantidad:</b> ${libro.cantidad || ''}</div>
-        <div class="detalle-campo"><b>Sinopsis:</b> ${libro.sinopsis || ''}</div>
       `;
       modal.style.display = 'flex';
     }
@@ -126,13 +122,17 @@
 
     // Evento del buscador
     document.getElementById('buscador-libros').addEventListener('input', function () {
-      const texto = this.value.toLowerCase();
+      // Función para quitar tildes solo para comparar
+      function quitarTildes(str) {
+        return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      }
+      const texto = quitarTildes(this.value);
       const filtrados = todosLosLibros.filter(libro =>
-        (libro.nombre || '').toLowerCase().includes(texto) ||
-        (libro.autor || '').toLowerCase().includes(texto) ||
-        (libro.categoria || '').toLowerCase().includes(texto)
+        quitarTildes(libro.nombre).includes(texto) ||
+        quitarTildes(libro.autor).includes(texto) ||
+        quitarTildes(libro.categoria).includes(texto)
       );
-      mostrarLibros(filtrados);
+      mostrarLibros(filtrados); // Se muestran los datos originales, con tildes si las tienen
     });
 
     // Al cargar la página, mostrar la primera sección

@@ -243,7 +243,7 @@
           <input type="text" id="edit-autor" class="input-form" placeholder="Autor" value="${libro.autor}" required>
           <input type="text" id="edit-estado" class="input-form" placeholder="Estado" value="${libro.estado}" required>
           <input type="text" id="edit-origen" class="input-form" placeholder="Origen" value="${libro.origen}" required>
-          <input type="file" id="edit-imagenArchivo" class="input-form" accept="image/*">
+          <input type="file" id="edit-imagenArchivo" class="input-form" placeholder="imagen" value="${libro.imagen}" >
           <div style="display:flex;gap:10px;justify-content:flex-end;">
             <button type="submit" class="btn-guardar">Guardar cambios</button>
             <button type="button" id="cancelar-edicion" class="btn-cancelar">Cancelar</button>
@@ -271,8 +271,11 @@
         formData.append('autor', autor);
         formData.append('estado', estado);
         formData.append('origen', origen);
+        // Si se selecciona archivo, se envía; si no, se envía imagen vacía para eliminar la imagen existente
         if (imagenArchivo) {
           formData.append('imagenArchivo', imagenArchivo);
+        } else {
+          formData.append('imagen', ''); // Eliminar imagen existente
         }
         fetch(`/api/libros/${seccion}/${id}`, {
           method: 'PUT',
