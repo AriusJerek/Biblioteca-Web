@@ -43,16 +43,26 @@ def catalogo():
 # --- API para libros por sección ---
 @app.route('/api/libros/<seccion>', methods=['GET'])
 def api_libros_seccion(seccion):
+    # Paginación: ?page=1&limit=50
     tabla = f'libros_{seccion}'
+    page = request.args.get('page', default=1, type=int)
+    limit = request.args.get('limit', default=50, type=int)
+    offset = (page - 1) * limit
     conn = sqlite3.connect(DATABASE_LIBROS)
     conn.row_factory = sqlite3.Row
     try:
-        libros = conn.execute(f'SELECT * FROM {tabla}').fetchall()
+        total = conn.execute(f'SELECT COUNT(*) FROM {tabla}').fetchone()[0]
+        libros = conn.execute(f'SELECT * FROM {tabla} LIMIT ? OFFSET ?', (limit, offset)).fetchall()
     except sqlite3.OperationalError:
         conn.close()
         return jsonify({'error': f'No existe la sección {seccion}'}), 404
     conn.close()
-    return jsonify([dict(libro) for libro in libros])
+    return jsonify({
+        'libros': [dict(libro) for libro in libros],
+        'total': total,
+        'page': page,
+        'limit': limit
+    })
 
 @app.route('/api/libros/<seccion>', methods=['POST'])
 def agregar_libro_seccion(seccion):

@@ -11,68 +11,143 @@
 
   <label for="seccion-selector"><b>Sección:</b></label>
   <select id="seccion-selector" class="seccion-selector">
-    <option value="000">Sección 000</option>
-    <option value="100">Sección 100</option>
-    <option value="200">Sección 200</option>
-    <option value="300">Sección 300</option>
-    <option value="400">Sección 400</option>
-    <option value="500">Sección 500</option>
-    <option value="600">Sección 600</option>
-    <option value="700">Sección 700</option>
-    <option value="800">Sección 800</option>
-    <option value="900">Sección 900</option>
+    <option value="000">Generalidades</option>
+    <option value="100">Filosofia y Psicología</option>
+    <option value="200">Religión</option>
+    <option value="300">Ciencias Sociales</option>
+    <option value="400">Lenguas</option>
+    <option value="500">Ciencias Naturales y Matemáticas</option>
+    <option value="600">Tecnología/Ciencias Aplicadas</option>
+    <option value="700">Las Artes</option>
+    <option value="800">Literatura y Retórica</option>
+    <option value="900">Geografía e Historia</option>
   </select>
   <input type="text" id="buscador-libros" placeholder="Buscar libro, autor o categoría">
   <div class="catalogo-grid" id="libros"></div>
-  
+  <div id="mensaje-vacio" style="display:none;text-align:center;margin:2em 0;color:#888;font-size:1.2em;"></div>
+  <div id="paginacion" style="display:flex;justify-content:center;gap:8px;margin:2em 0;"></div>
   <!-- Modal para detalles del libro -->
   <div id="modal-libro" class="modal-libro" style="display:none;">
     <div class="modal-libro-contenido">
-      <span id="cerrar-modal-libro" class="cerrar-modal-libro">&times;</span>
+      <button id="cerrar-modal-libro" class="cerrar-modal-libro" aria-label="Cerrar">&times;</button>
       <div id="detalle-libro"></div>
     </div>
   </div>
-  <style>
-    .modal-libro {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;
-    }
-    .modal-libro-contenido {
-      background: #fff; padding: 2em; border-radius: 8px; max-width: 400px; width: 90%; position: relative;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
-    }
-    .cerrar-modal-libro {
-      position: absolute; top: 10px; right: 16px; font-size: 2em; cursor: pointer; color: #888;
-    }
-    .modal-libro img { max-width: 120px; display: block; margin-bottom: 1em; }
-    .modal-libro .img-placeholder { width: 120px; height: 160px; background: #eee; display: flex; align-items: center; justify-content: center; color: #888; margin-bottom: 1em; }
-    .modal-libro .detalle-campo { margin-bottom: 0.5em; }
-  </style>
   <script>
+    // Referencias a elementos
+    const navbarContainer = document.getElementById("navbar-container");
+    const seccionSelector = document.getElementById('seccion-selector');
+    const buscadorLibros = document.getElementById('buscador-libros');
+    const contenedorLibros = document.getElementById('libros');
+    const mensajeVacio = document.getElementById('mensaje-vacio');
+    const modalLibro = document.getElementById('modal-libro');
+    const cerrarModalLibro = document.getElementById('cerrar-modal-libro');
+    const detalleLibro = document.getElementById('detalle-libro');
+
     fetch("/static/navbar.html")
     .then(res => res.text())
     .then(html => {
-      document.getElementById("navbar-container").innerHTML = html;
+      navbarContainer.innerHTML = html;
     });
-  </script>
 
-  <script>
     let todosLosLibros = [];
+    let totalLibros = 0;
+    let paginaActual = 1;
+    let limitePorPagina = 50;
+    let textoBusqueda = '';
 
-    function cargarLibros(seccion) {
-      // Obtener los libros desde la API
-      fetch(`/api/libros/${seccion}`)
+    function mostrarMensajeVacio(msg) {
+      mensajeVacio.textContent = msg;
+      mensajeVacio.style.display = 'block';
+    }
+    function ocultarMensajeVacio() {
+      mensajeVacio.style.display = 'none';
+    }
+
+    function renderPaginacion(total, pagina, limite) {
+      const paginacion = document.getElementById('paginacion');
+      paginacion.innerHTML = '';
+      const totalPaginas = Math.ceil(total / limite);
+      if (totalPaginas <= 1) { paginacion.style.display = 'none'; return; }
+      paginacion.style.display = 'flex';
+      // Botón anterior
+      const btnAnt = document.createElement('button');
+      btnAnt.textContent = 'Anterior';
+      btnAnt.disabled = pagina <= 1;
+      btnAnt.onclick = () => cambiarPagina(pagina - 1);
+      paginacion.appendChild(btnAnt);
+      // Números de página (máximo 5)
+      let inicio = Math.max(1, pagina - 2);
+      let fin = Math.min(totalPaginas, pagina + 2);
+      if (pagina <= 3) fin = Math.min(5, totalPaginas);
+      if (pagina >= totalPaginas - 2) inicio = Math.max(1, totalPaginas - 4);
+      for (let i = inicio; i <= fin; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.disabled = i === pagina;
+        if (i !== pagina) btn.onclick = () => cambiarPagina(i);
+        if (i === pagina) btn.style.fontWeight = 'bold';
+        paginacion.appendChild(btn);
+      }
+      // Botón siguiente
+      const btnSig = document.createElement('button');
+      btnSig.textContent = 'Siguiente';
+      btnSig.disabled = pagina >= totalPaginas;
+      btnSig.onclick = () => cambiarPagina(pagina + 1);
+      paginacion.appendChild(btnSig);
+    }
+
+    function cambiarPagina(nuevaPagina) {
+      paginaActual = nuevaPagina;
+      cargarLibros(seccionSelector.value, paginaActual, textoBusqueda);
+    }
+
+    function cargarLibros(seccion, pagina = 1, busqueda = '') {
+      let url = `/api/libros/${seccion}?page=${pagina}&limit=${limitePorPagina}`;
+      fetch(url)
         .then(res => res.json())
         .then(data => {
-          todosLosLibros = data;
-          mostrarLibros(data);
+          if (data.error) {
+            mostrarMensajeVacio('No se pudo cargar la sección. Intente más tarde.');
+            contenedorLibros.innerHTML = '';
+            renderPaginacion(0, 1, limitePorPagina);
+            return;
+          }
+          todosLosLibros = data.libros;
+          totalLibros = data.total;
+          paginaActual = data.page;
+          // Si hay búsqueda, filtrar en frontend
+          let librosAMostrar = todosLosLibros;
+          if (busqueda) {
+            librosAMostrar = todosLosLibros.filter(libro =>
+              quitarTildes(libro.nombre).includes(busqueda) ||
+              quitarTildes(libro.autor).includes(busqueda) ||
+              quitarTildes(libro.categoria).includes(busqueda)
+            );
+            // Si la búsqueda filtra menos de 50, paginar en frontend
+            totalLibros = librosAMostrar.length;
+            librosAMostrar = librosAMostrar.slice(0, limitePorPagina);
+            renderPaginacion(totalLibros, 1, limitePorPagina);
+          } else {
+            renderPaginacion(data.total, data.page, data.limit);
+          }
+          mostrarLibros(librosAMostrar);
+        })
+        .catch(() => {
+          mostrarMensajeVacio('No se pudo cargar la sección. Intente más tarde.');
+          contenedorLibros.innerHTML = '';
+          renderPaginacion(0, 1, limitePorPagina);
         });
     }
 
     function mostrarLibros(libros) {
-      const contenedor = document.getElementById('libros');
-      contenedor.innerHTML = '';
-      libros.forEach((libro, idx) => {
+      contenedorLibros.innerHTML = '';
+      if (!libros.length) {
+        mostrarMensajeVacio('No hay libros en esta sección o búsqueda.');
+        return;
+      }
+      ocultarMensajeVacio();
+      libros.forEach((libro) => {
         const div = document.createElement('div');
         div.className = 'libro-preview';
         div.innerHTML = `
@@ -85,18 +160,15 @@
             <p class="categoria">${libro.categoria || ''}</p>
           </div>
         `;
-        // Evento para mostrar modal con detalles
         div.addEventListener('click', function() {
           mostrarModalLibro(libro);
         });
-        contenedor.appendChild(div);
+        contenedorLibros.appendChild(div);
       });
     }
 
     function mostrarModalLibro(libro) {
-      const modal = document.getElementById('modal-libro');
-      const detalle = document.getElementById('detalle-libro');
-      detalle.innerHTML = `
+      detalleLibro.innerHTML = `
         <div style="text-align:center;">
           ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada del libro">` : '<div class="img-placeholder">Sin imagen</div>'}
         </div>
@@ -105,38 +177,74 @@
         <div class="detalle-campo"><b>Categoría:</b> ${libro.categoria || ''}</div>
         <div class="detalle-campo"><b>Código:</b> ${libro.codigo || ''}</div>
       `;
-      modal.style.display = 'flex';
+      modalLibro.style.display = 'flex';
+      // Enfocar el botón de cerrar para accesibilidad
+      cerrarModalLibro.focus();
     }
-    // Cerrar modal al hacer click en la X o fuera del contenido
-    document.getElementById('cerrar-modal-libro').onclick = function() {
-      document.getElementById('modal-libro').style.display = 'none';
+    // Cerrar modal al hacer click en la X, fuera del contenido o con Escape
+    cerrarModalLibro.onclick = function() {
+      modalLibro.style.display = 'none';
     };
-    document.getElementById('modal-libro').onclick = function(e) {
+    modalLibro.onclick = function(e) {
       if (e.target === this) this.style.display = 'none';
     };
-
-    // Evento del selector de sección
-    document.getElementById('seccion-selector').addEventListener('change', function () {
-      cargarLibros(this.value);
+    document.addEventListener('keydown', function(e) {
+      if (modalLibro.style.display === 'flex' && (e.key === 'Escape' || e.key === 'Esc')) {
+        modalLibro.style.display = 'none';
+      }
     });
 
-    // Evento del buscador
-    document.getElementById('buscador-libros').addEventListener('input', function () {
-      // Función para quitar tildes solo para comparar
-      function quitarTildes(str) {
-        return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    // Función para quitar tildes solo para comparar
+    function quitarTildes(str) {
+      return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    // Nueva función: cargar todos los libros de una sección (para búsqueda global)
+    async function cargarTodosLosLibrosDeSeccion(seccion) {
+      let pagina = 1;
+      let librosAcumulados = [];
+      let totalPaginas = 1;
+      do {
+        const res = await fetch(`/api/libros/${seccion}?page=${pagina}&limit=${limitePorPagina}`);
+        const data = await res.json();
+        if (data.error) break;
+        librosAcumulados = librosAcumulados.concat(data.libros);
+        totalPaginas = Math.ceil(data.total / data.limit);
+        pagina++;
+      } while (pagina <= totalPaginas);
+      return librosAcumulados;
+    }
+
+    buscadorLibros.addEventListener('input', async function () {
+      textoBusqueda = quitarTildes(this.value);
+      if (textoBusqueda) {
+        // Buscar en todos los libros de la sección (todas las páginas)
+        mostrarMensajeVacio('Buscando en toda la sección...');
+        const todos = await cargarTodosLosLibrosDeSeccion(seccionSelector.value);
+        ocultarMensajeVacio();
+        todosLosLibros = todos;
+        const filtrados = todosLosLibros.filter(libro =>
+          quitarTildes(libro.nombre).includes(textoBusqueda) ||
+          quitarTildes(libro.autor).includes(textoBusqueda) ||
+          quitarTildes(libro.categoria).includes(textoBusqueda)
+        );
+        totalLibros = filtrados.length;
+        mostrarLibros(filtrados.slice(0, limitePorPagina));
+        renderPaginacion(totalLibros, 1, limitePorPagina);
+      } else {
+        cargarLibros(seccionSelector.value, paginaActual);
       }
-      const texto = quitarTildes(this.value);
-      const filtrados = todosLosLibros.filter(libro =>
-        quitarTildes(libro.nombre).includes(texto) ||
-        quitarTildes(libro.autor).includes(texto) ||
-        quitarTildes(libro.categoria).includes(texto)
-      );
-      mostrarLibros(filtrados); // Se muestran los datos originales, con tildes si las tienen
+    });
+
+    seccionSelector.addEventListener('change', function () {
+      paginaActual = 1;
+      textoBusqueda = '';
+      buscadorLibros.value = '';
+      cargarLibros(this.value, paginaActual);
     });
 
     // Al cargar la página, mostrar la primera sección
-    cargarLibros(document.getElementById('seccion-selector').value);
+    cargarLibros(seccionSelector.value, paginaActual);
   </script>
 </body>
 </html>

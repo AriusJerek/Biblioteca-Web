@@ -72,9 +72,9 @@
       fetch(`/api/libros/${seccion}`)
         .then(res => res.json().then(data => ({status: res.status, data})))
         .then(({status, data}) => {
-          if (Array.isArray(data)) {
-            todosLosLibros = data;
-            mostrarLibros(data);
+          if (data && Array.isArray(data.libros)) {
+            todosLosLibros = data.libros;
+            mostrarLibros(data.libros);
           } else if (data && data.error) {
             document.getElementById('listaLibros').innerHTML = `<li style="color:red">${data.error}</li>`;
             mostrarMensaje(data.error, 'error');
