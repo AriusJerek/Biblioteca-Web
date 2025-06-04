@@ -43,13 +43,6 @@ Este proyecto es una aplicación web para la administración y consulta de libro
      ```
    - Accede a `http://localhost:5000` desde tu navegador.
 
-3. **Variables de entorno (opcional)**
-   - Puedes definir la clave secreta de Flask al ejecutar el contenedor:
-     ```powershell
-     docker run -p 5000:5000 -v ${PWD}\database:/app/database -e SECRET_KEY=miclave biblioteca-web
-     ```
-   - Asegúrate de que tu `app.py` lea la variable de entorno `SECRET_KEY` (ya preparado en el código si seguiste las recomendaciones).
-
 ## Guía rápida para instalar y ejecutar en otra máquina
 
 ### Opción 1: Instalación tradicional
