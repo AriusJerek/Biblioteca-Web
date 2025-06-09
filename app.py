@@ -128,7 +128,7 @@ def agregar_libro_seccion(seccion):
                       (cantidad, codigo, categoria, nombre, autor, estado, origen, imagen))
             conn.commit()
             libros = c.execute(f'SELECT * FROM {tabla}').fetchall()
-            return jsonify([dict(libro) for libro in libros]), 201
+            return jsonify({'libros': [dict(libro) for libro in libros]}), 201
     except sqlite3.OperationalError:
         return jsonify({'error': 'Sección no encontrada'}), 404
     except sqlite3.IntegrityError:
@@ -261,7 +261,7 @@ def editar_libro_seccion(seccion, libro_id):
             if c.rowcount == 0:
                 return jsonify({'error': 'Libro no encontrado'}), 404
             libros = c.execute(f'SELECT * FROM {tabla}').fetchall()
-            return jsonify([dict(libro) for libro in libros])
+            return jsonify({'libros': [dict(libro) for libro in libros]})
     except sqlite3.OperationalError:
         return jsonify({'error': 'Sección no encontrada'}), 404
     except Exception:
