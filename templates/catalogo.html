@@ -5,6 +5,105 @@
   <title>Catálogo de Libros</title>
   <link rel="icon" href="../static/img/favicon.png" type="image/png">
   <link rel="stylesheet" href="/static/css/estilos.css">
+  <style>
+    .modal-libro {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.32);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 2vw;
+      overflow-y: auto;
+    }
+    .modal-libro[style*="display: flex"] {
+      display: flex !important;
+    }
+    .modal-libro-contenido {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+      padding: 2em 1.5em 1.5em 1.5em;
+      max-width: 420px;
+      width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: 2vh auto;
+      position: relative;
+      animation: modalFadeIn 0.22s;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7em;
+    }
+    .cerrar-modal-libro {
+      position: absolute;
+      top: 0.7em;
+      right: 1em;
+      background: none;
+      border: none;
+      font-size: 2em;
+      color: #888;
+      cursor: pointer;
+      transition: color 0.2s;
+      z-index: 1;
+    }
+    .cerrar-modal-libro:hover, .cerrar-modal-libro:focus {
+      color: #c00;
+      outline: none;
+    }
+    .modal-libro-contenido img {
+      max-width: 120px;
+      max-height: 170px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      margin-bottom: 0.7em;
+    }
+    .img-placeholder {
+      width: 120px;
+      height: 170px;
+      background: #f0f0f0;
+      color: #aaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 1em;
+      margin: 0 auto 0.7em auto;
+    }
+    .modal-libro-contenido h2 {
+      margin: 0.2em 0 0.5em 0;
+      font-size: 1.3em;
+      text-align: center;
+      color: #2a2a2a;
+    }
+    .detalle-campo {
+      margin-bottom: 0.3em;
+      font-size: 1em;
+      color: #444;
+    }
+    @media (max-width: 600px) {
+      .modal-libro-contenido {
+        width: 99vw;
+        max-width: 99vw;
+        min-width: unset;
+        max-height: 96vh;
+        padding: 1em 0.2em 0.7em 0.2em;
+        margin: 1vh auto;
+      }
+      .modal-libro-contenido img, .img-placeholder {
+        max-width: 90vw;
+        width: 90vw;
+        height: auto;
+        max-height: 40vh;
+      }
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+  </style>
 </head>
 <body>
   <div id="navbar-container"></div>
