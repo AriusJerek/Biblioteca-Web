@@ -656,9 +656,11 @@ header p { font-size: 1.2em; margin-bottom: 40px; }
   box-shadow: 0 4px 32px rgba(0,0,0,0.18);
   padding: 2em 1.5em 1.5em 1.5em;
   z-index: 10001;
-  min-width: 320px;
-  max-width: 380px;
   width: 95vw;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 2vh;
   display: flex;
   flex-direction: column;
   gap: 0.7em;
@@ -666,11 +668,14 @@ header p { font-size: 1.2em; margin-bottom: 40px; }
   animation: modalFadeIn 0.25s;
   font-family: 'Segoe UI', Arial, sans-serif;
 }
-@media (max-width: 500px) {
+@media (max-width: 600px) {
   .form-editar-libro {
-    min-width: 98vw;
+    width: 98vw;
     max-width: 99vw;
+    min-width: unset;
+    max-height: 96vh;
     padding: 1em 0.2em 0.7em 0.2em;
+    margin: 1vh;
   }
 }
 @keyframes modalFadeIn {
