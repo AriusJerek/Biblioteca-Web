@@ -71,7 +71,7 @@
   <script>
     let todosLosLibros = [];
     let paginaActual = 1;
-    let limitePorPagina = 500;
+    let limitePorPagina = 50;
     let librosFiltradosGlobal = null;
     let buscando = false;
 
@@ -92,15 +92,15 @@
     function renderPaginacion(total, pagina, limite) {
       const paginacion = document.getElementById('paginacion-gestion');
       if (!paginacion) return;
+      paginacion.style.display = 'flex'; // Siempre visible
       paginacion.innerHTML = '';
       const totalPaginas = Math.ceil(total / limite);
-      if (totalPaginas <= 1) { paginacion.style.display = 'none'; return; }
-      paginacion.style.display = 'flex';
+      // Si solo hay una página, igual muestra la barra pero deshabilitada
       // Botón anterior
       const btnAnt = document.createElement('button');
       btnAnt.textContent = 'Anterior';
       btnAnt.className = 'btn-paginacion';
-      btnAnt.disabled = pagina <= 1;
+      btnAnt.disabled = pagina <= 1 || totalPaginas <= 1;
       btnAnt.onclick = () => cambiarPagina(pagina - 1);
       paginacion.appendChild(btnAnt);
       // Números de página (máximo 5)
@@ -112,8 +112,8 @@
         const btn = document.createElement('button');
         btn.textContent = i;
         btn.className = 'btn-paginacion';
-        btn.disabled = i === pagina;
-        if (i !== pagina) btn.onclick = () => cambiarPagina(i);
+        btn.disabled = i === pagina || totalPaginas <= 1;
+        if (i !== pagina && totalPaginas > 1) btn.onclick = () => cambiarPagina(i);
         if (i === pagina) btn.classList.add('pagina-activa');
         paginacion.appendChild(btn);
       }
@@ -121,7 +121,7 @@
       const btnSig = document.createElement('button');
       btnSig.textContent = 'Siguiente';
       btnSig.className = 'btn-paginacion';
-      btnSig.disabled = pagina >= totalPaginas;
+      btnSig.disabled = pagina >= totalPaginas || totalPaginas <= 1;
       btnSig.onclick = () => cambiarPagina(pagina + 1);
       paginacion.appendChild(btnSig);
     }
@@ -142,27 +142,23 @@
       mostrarLibros(librosParaPaginar.slice(inicio, fin));
     }
 
-    // Modifica cargarLibros para resetear paginación y mostrar solo paginación
-    function cargarLibros(seccion) {
-      fetch(`/api/libros/${seccion}`)
-        .then(res => res.json().then(data => ({status: res.status, data})))
-        .then(({status, data}) => {
-          if (data && Array.isArray(data.libros)) {
-            todosLosLibros = data.libros;
-            paginaActual = 1;
-            mostrarLibrosPaginados();
-          } else if (data && data.error) {
-            document.getElementById('listaLibros').innerHTML = `<li style="color:red">${data.error}</li>`;
-            mostrarMensaje(data.error, 'error');
-          } else {
-            document.getElementById('listaLibros').innerHTML = '<li style="color:red">No se pudieron cargar los libros.</li>';
-            mostrarMensaje('No se pudieron cargar los libros.', 'error');
-          }
-        })
-        .catch(() => {
-          document.getElementById('listaLibros').innerHTML = '<li style="color:red">No se pudieron cargar los libros.</li>';
-          mostrarMensaje('No se pudieron cargar los libros.', 'error');
-        });
+    // Modifica cargarLibros para traer todos los libros de la sección (todas las páginas) y paginar en frontend
+    async function cargarLibros(seccion) {
+      let pagina = 1;
+      let librosAcumulados = [];
+      let totalPaginas = 1;
+      do {
+        const res = await fetch(`/api/libros/${seccion}?page=${pagina}&limit=${limitePorPagina}`);
+        const data = await res.json();
+        if (data.error) break;
+        librosAcumulados = librosAcumulados.concat(data.libros);
+        totalPaginas = Math.ceil(data.total / data.limit);
+        pagina++;
+      } while (pagina <= totalPaginas);
+      todosLosLibros = librosAcumulados;
+      paginaActual = 1;
+      librosFiltradosGlobal = null;
+      mostrarLibrosPaginados();
     }
 
     function mostrarLibros(libros) {
@@ -195,92 +191,50 @@
     }
 
     // --- BÚSQUEDA Y PAGINACIÓN GLOBAL COMO EN CATÁLOGO ---
-function quitarTildes(str) {
-  return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
+    function quitarTildes(str) {
+      return (str || '').normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase();
+    }
 
-async function cargarTodosLosLibrosDeSeccion(seccion) {
-  let pagina = 1;
-  let librosAcumulados = [];
-  let totalPaginas = 1;
-  do {
-    const res = await fetch(`/api/libros/${seccion}?page=${pagina}&limit=${limitePorPagina}`);
-    const data = await res.json();
-    if (data.error) break;
-    librosAcumulados = librosAcumulados.concat(data.libros);
-    totalPaginas = Math.ceil(data.total / data.limit);
-    pagina++;
-  } while (pagina <= totalPaginas);
-  return librosAcumulados;
-}
+    async function cargarTodosLosLibrosDeSeccion(seccion) {
+      let pagina = 1;
+      let librosAcumulados = [];
+      let totalPaginas = 1;
+      do {
+        const res = await fetch(`/api/libros/${seccion}?page=${pagina}&limit=${limitePorPagina}`);
+        const data = await res.json();
+        if (data.error) break;
+        librosAcumulados = librosAcumulados.concat(data.libros);
+        totalPaginas = Math.ceil(data.total / data.limit);
+        pagina++;
+      } while (pagina <= totalPaginas);
+      return librosAcumulados;
+    }
 
-let textoBusqueda = '';
-document.getElementById('buscador').addEventListener('input', async function () {
-  textoBusqueda = quitarTildes(this.value);
-  if (textoBusqueda) {
-    buscando = true;
-    actualizarIndicadorResultados(0, 0, 0, true);
-    const seccion = document.getElementById('seccion-selector').value;
-    todosLosLibros = await cargarTodosLosLibrosDeSeccion(seccion);
-    paginaActual = 1;
-    buscando = false;
-    mostrarLibrosBusquedaPaginados();
-  } else {
-    const seccion = document.getElementById('seccion-selector').value;
-    cargarLibros(seccion);
-  }
-});
-
-function mostrarLibrosBusquedaPaginados() {
-  const filtrados = todosLosLibros.filter(libro =>
-    quitarTildes(libro.nombre).includes(textoBusqueda) ||
-    quitarTildes(libro.autor).includes(textoBusqueda) ||
-    quitarTildes(libro.categoria).includes(textoBusqueda) ||
-    quitarTildes(libro.codigo).includes(textoBusqueda) ||
-    quitarTildes(libro.estado).includes(textoBusqueda) ||
-    quitarTildes(libro.origen).includes(textoBusqueda)
-  );
-  const total = filtrados.length;
-  const inicio = (paginaActual - 1) * limitePorPagina;
-  const fin = inicio + limitePorPagina;
-  renderPaginacionBusqueda(total, paginaActual, limitePorPagina, filtrados);
-  actualizarIndicadorResultados(total, inicio, fin, true);
-  mostrarLibros(filtrados.slice(inicio, fin));
-}
-
-function renderPaginacionBusqueda(total, pagina, limite, filtrados) {
-  const paginacion = document.getElementById('paginacion-gestion');
-  if (!paginacion) return;
-  paginacion.innerHTML = '';
-  const totalPaginas = Math.ceil(total / limite);
-  if (totalPaginas <= 1) { paginacion.style.display = 'none'; return; }
-  paginacion.style.display = 'flex';
-  const btnAnt = document.createElement('button');
-  btnAnt.textContent = 'Anterior';
-  btnAnt.className = 'btn-paginacion';
-  btnAnt.disabled = pagina <= 1;
-  btnAnt.onclick = () => { paginaActual = pagina - 1; mostrarLibrosBusquedaPaginados(); };
-  paginacion.appendChild(btnAnt);
-  let inicio = Math.max(1, pagina - 2);
-  let fin = Math.min(totalPaginas, pagina + 2);
-  if (pagina <= 3) fin = Math.min(5, totalPaginas);
-  if (pagina >= totalPaginas - 2) inicio = Math.max(1, totalPaginas - 4);
-  for (let i = inicio; i <= fin; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = 'btn-paginacion';
-    btn.disabled = i === pagina;
-    if (i !== pagina) btn.onclick = () => { paginaActual = i; mostrarLibrosBusquedaPaginados(); };
-    if (i === pagina) btn.classList.add('pagina-activa');
-    paginacion.appendChild(btn);
-  }
-  const btnSig = document.createElement('button');
-  btnSig.textContent = 'Siguiente';
-  btnSig.className = 'btn-paginacion';
-  btnSig.disabled = pagina >= totalPaginas;
-  btnSig.onclick = () => { paginaActual = pagina + 1; mostrarLibrosBusquedaPaginados(); };
-  paginacion.appendChild(btnSig);
-}
+    let textoBusqueda = '';
+    document.getElementById('buscador').addEventListener('input', async function () {
+      textoBusqueda = quitarTildes(this.value);
+      if (textoBusqueda) {
+        buscando = true;
+        actualizarIndicadorResultados(0, 0, 0, true);
+        const seccion = document.getElementById('seccion-selector').value;
+        todosLosLibros = await cargarTodosLosLibrosDeSeccion(seccion);
+        paginaActual = 1;
+        buscando = false;
+        librosFiltradosGlobal = todosLosLibros.filter(libro =>
+          quitarTildes(libro.nombre).includes(textoBusqueda) ||
+          quitarTildes(libro.autor).includes(textoBusqueda) ||
+          quitarTildes(libro.categoria).includes(textoBusqueda) ||
+          quitarTildes(libro.codigo).includes(textoBusqueda) ||
+          quitarTildes(libro.estado).includes(textoBusqueda) ||
+          quitarTildes(libro.origen).includes(textoBusqueda)
+        );
+        mostrarLibrosPaginados();
+      } else {
+        librosFiltradosGlobal = null;
+        paginaActual = 1;
+        mostrarLibrosPaginados();
+      }
+    });
 
     // Al agregar libro, refrescar la lista y el buscador
     document.getElementById('formAgregarLibro').addEventListener('submit', function(e) {
