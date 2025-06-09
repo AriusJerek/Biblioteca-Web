@@ -181,8 +181,8 @@
             <p class="categoria">${libro.categoria || ''}</p>
             <p class="cantidad"><b>Cantidad:</b> ${libro.cantidad}</p>
             <div class="acciones-gestion">
-              <button type="button" class="btn-editar" onclick="editarLibro(${libro.id})"><span style='vertical-align:middle;'>✏️</span> Editar</button>
-              <button type="button" class="btn-eliminar" onclick="eliminarLibro(${libro.id})"><span style='vertical-align:middle;'>🗑️</span> Eliminar</button>
+              <button type="button" class="btn-editar" onclick="editarLibro('${String(libro.id)}')"><span style='vertical-align:middle;'>✏️</span> Editar</button>
+              <button type="button" class="btn-eliminar" onclick="eliminarLibro('${String(libro.id)}')"><span style='vertical-align:middle;'>🗑️</span> Eliminar</button>
             </div>
           </div>
         `;
@@ -315,13 +315,57 @@
 
     // Eliminar libro
     function eliminarLibro(id) {
-      const seccion = document.getElementById('seccion-selector').value;
-      if (confirm('¿Seguro que deseas eliminar este libro?')) {
+      let libro = null;
+      if (librosFiltradosGlobal && Array.isArray(librosFiltradosGlobal)) {
+        libro = librosFiltradosGlobal.find(l => String(l.id) === String(id));
+      }
+      if (!libro) {
+        libro = todosLosLibros.find(l => String(l.id) === String(id));
+      }
+      if (!libro) return;
+      crearFondoModalEdicion();
+      let confirmDiv = document.getElementById('form-eliminar-libro');
+      if (confirmDiv) confirmDiv.remove();
+      confirmDiv = document.createElement('div');
+      confirmDiv.id = 'form-eliminar-libro';
+      confirmDiv.className = 'form-editar-libro';
+      confirmDiv.setAttribute('role', 'dialog');
+      confirmDiv.setAttribute('aria-modal', 'true');
+      confirmDiv.setAttribute('tabindex', '-1');
+      confirmDiv.innerHTML = `
+        <button id="cerrar-eliminar-x" aria-label="Cerrar" style="position:absolute;top:10px;right:16px;font-size:1.5em;background:none;border:none;cursor:pointer;color:#888;">&times;</button>
+        <h2 style="margin-top:0;">Eliminar libro</h2>
+        <div style="margin-bottom:1em;">
+          <b>¿Seguro que deseas eliminar este libro?</b><br>
+          <span><b>Nombre:</b> ${libro.nombre}</span><br>
+          <span><b>Autor:</b> ${libro.autor}</span><br>
+          ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada actual" style="max-width:80px;max-height:120px;margin:8px auto;display:block;">` : '<div class="img-placeholder">Sin imagen</div>'}
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" id="cancelar-eliminar" class="btn-cancelar">Cancelar</button>
+          <button type="button" id="confirmar-eliminar" class="btn-eliminar">Eliminar</button>
+        </div>
+      `;
+      document.body.appendChild(confirmDiv);
+      confirmDiv.focus();
+      document.getElementById('cerrar-eliminar-x').onclick = () => { confirmDiv.remove(); eliminarFondoModalEdicion(); };
+      document.getElementById('cancelar-eliminar').onclick = () => { confirmDiv.remove(); eliminarFondoModalEdicion(); };
+      document.getElementById('confirmar-eliminar').onclick = () => {
+        const seccion = document.getElementById('seccion-selector').value;
         fetch(`/api/libros/${seccion}/${id}`, { method: 'DELETE' })
           .then(res => res.json())
-          .then(() => cargarLibros(seccion));
-      }
+          .then(() => {
+            cargarLibros(seccion);
+            mostrarMensaje('Libro eliminado correctamente', 'success');
+            confirmDiv.remove();
+            eliminarFondoModalEdicion();
+          })
+          .catch(() => {
+            mostrarMensaje('Error al eliminar libro', 'error');
+          });
+      };
     }
+    window.editarLibro = editarLibro;
     window.eliminarLibro = eliminarLibro;
     document.getElementById('seccion-selector').addEventListener('change', function () {
       cargarLibros(this.value);
@@ -353,7 +397,14 @@
     }
 
     function editarLibro(id) {
-      const libro = todosLosLibros.find(l => l.id === id);
+      // Buscar el libro en el array filtrado si hay búsqueda, si no en todosLosLibros
+      let libro = null;
+      if (librosFiltradosGlobal && Array.isArray(librosFiltradosGlobal)) {
+        libro = librosFiltradosGlobal.find(l => String(l.id) === String(id));
+      }
+      if (!libro) {
+        libro = todosLosLibros.find(l => String(l.id) === String(id));
+      }
       if (!libro) return;
       crearFondoModalEdicion();
       let formDiv = document.getElementById('form-editar-libro');
@@ -361,25 +412,42 @@
       formDiv = document.createElement('div');
       formDiv.id = 'form-editar-libro';
       formDiv.className = 'form-editar-libro';
+      formDiv.setAttribute('role', 'dialog');
+      formDiv.setAttribute('aria-modal', 'true');
+      formDiv.setAttribute('tabindex', '-1');
       formDiv.innerHTML = `
-        <button id="cerrar-edicion-x" style="position:absolute;top:10px;right:16px;font-size:1.5em;background:none;border:none;cursor:pointer;color:#888;">&times;</button>
-        <h3>Editar libro</h3>
-        <form id="formEditarLibro" style="display:flex;flex-direction:column;gap:12px;" enctype="multipart/form-data">
+        <button id="cerrar-edicion-x" aria-label="Cerrar" style="position:absolute;top:10px;right:16px;font-size:1.5em;background:none;border:none;cursor:pointer;color:#888;">&times;</button>
+        <h2 style="margin-top:0;">Editar libro</h2>
+        <form id="formEditarLibro" style="display:flex;flex-direction:column;gap:12px;max-width:350px;" enctype="multipart/form-data">
+          <label for="edit-cantidad"><b>Cantidad</b></label>
           <input type="number" id="edit-cantidad" class="input-form" placeholder="Cantidad" min="1" value="${libro.cantidad || 1}" required>
-          <input type="text" id="edit-codigo" class="input-form" placeholder="Código" value="${libro.codigo}" required>
-          <input type="text" id="edit-categoria" class="input-form" placeholder="Categoría" value="${libro.categoria}" required>
-          <input type="text" id="edit-nombre" class="input-form" placeholder="Nombre del libro" value="${libro.nombre}" required>
-          <input type="text" id="edit-autor" class="input-form" placeholder="Autor" value="${libro.autor}" required>
-          <input type="text" id="edit-estado" class="input-form" placeholder="Estado" value="${libro.estado}" required>
-          <input type="text" id="edit-origen" class="input-form" placeholder="Origen" value="${libro.origen}" required>
-          <input type="file" id="edit-imagenArchivo" class="input-form" placeholder="imagen" value="${libro.imagen}" >
+          <label for="edit-codigo"><b>Código</b></label>
+          <input type="text" id="edit-codigo" class="input-form" placeholder="Código" value="${libro.codigo || ''}" required>
+          <label for="edit-categoria"><b>Categoría</b></label>
+          <input type="text" id="edit-categoria" class="input-form" placeholder="Categoría" value="${libro.categoria || ''}" required>
+          <label for="edit-nombre"><b>Nombre del libro</b></label>
+          <input type="text" id="edit-nombre" class="input-form" placeholder="Nombre del libro" value="${libro.nombre || ''}" required>
+          <label for="edit-autor"><b>Autor</b></label>
+          <input type="text" id="edit-autor" class="input-form" placeholder="Autor" value="${libro.autor || ''}" required>
+          <label for="edit-estado"><b>Estado</b></label>
+          <input type="text" id="edit-estado" class="input-form" placeholder="Estado" value="${libro.estado || ''}" required>
+          <label for="edit-origen"><b>Origen</b></label>
+          <input type="text" id="edit-origen" class="input-form" placeholder="Origen" value="${libro.origen || ''}" required>
+          <label for="edit-imagen"><b>URL de imagen de portada (opcional)</b></label>
+          <input type="url" id="edit-imagen" class="input-form" placeholder="URL de imagen de portada (opcional)" value="${libro.imagen ? libro.imagen : ''}">
+          <label for="edit-imagenArchivo"><b>Subir nueva imagen</b></label>
+          <input type="file" id="edit-imagenArchivo" class="input-form" accept="image/*">
+          <div style="text-align:center;">
+            ${libro.imagen ? `<img src="${libro.imagen}" alt="Portada actual" style="max-width:80px;max-height:120px;margin:8px auto;display:block;">` : '<div class="img-placeholder">Sin imagen</div>'}
+          </div>
           <div style="display:flex;gap:10px;justify-content:flex-end;">
-            <button type="submit" class="btn-guardar">Guardar cambios</button>
             <button type="button" id="cancelar-edicion" class="btn-cancelar">Cancelar</button>
+            <button type="submit" class="btn-guardar">Guardar</button>
           </div>
         </form>
       `;
       document.body.appendChild(formDiv);
+      formDiv.focus();
       document.getElementById('cerrar-edicion-x').onclick = () => { formDiv.remove(); eliminarFondoModalEdicion(); };
       document.getElementById('cancelar-edicion').onclick = () => { formDiv.remove(); eliminarFondoModalEdicion(); };
       document.getElementById('formEditarLibro').onsubmit = function(e) {
@@ -392,7 +460,12 @@
         const autor = document.getElementById('edit-autor').value.trim();
         const estado = document.getElementById('edit-estado').value.trim();
         const origen = document.getElementById('edit-origen').value.trim();
+        const imagenUrl = document.getElementById('edit-imagen').value.trim();
         const imagenArchivo = document.getElementById('edit-imagenArchivo').files[0];
+        if (!cantidad || !nombre || !autor || !categoria || !codigo || !estado || !origen) return;
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
         const formData = new FormData();
         formData.append('cantidad', cantidad);
         formData.append('codigo', codigo);
@@ -404,7 +477,7 @@
         if (imagenArchivo) {
           formData.append('imagenArchivo', imagenArchivo);
         } else {
-          formData.append('imagen', '');
+          formData.append('imagen', imagenUrl);
         }
         fetch(`/api/libros/${seccion}/${id}`, {
           method: 'PUT',
@@ -425,10 +498,15 @@
         })
         .catch(() => {
           mostrarMensaje('Error al editar libro', 'error');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = 'Guardar';
         });
       };
     }
     window.editarLibro = editarLibro;
+    window.eliminarLibro = eliminarLibro;
     document.getElementById('seccion-selector').addEventListener('change', function () {
       cargarLibros(this.value);
     });
